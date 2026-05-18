@@ -1,6 +1,0 @@
-{
-  "root": "mitos",
-  "rewrites": [
-    { "source": "/", "destination": "/login.html" }
-  ]
-}
