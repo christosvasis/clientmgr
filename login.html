@@ -207,10 +207,10 @@
       <div class="login-title">Sign in</div>
 
       <div class="field">
-        <label for="username">Username</label>
+        <label for="email">Email</label>
         <div class="field-wrap">
-          <i class="ti ti-user"></i>
-          <input type="text" id="username" placeholder="Enter username" autocomplete="username" />
+          <i class="ti ti-mail"></i>
+          <input type="email" id="email" placeholder="Enter email" autocomplete="email" />
         </div>
       </div>
 
@@ -228,73 +228,109 @@
 
       <div class="error-msg" id="error-msg">
         <i class="ti ti-alert-circle"></i>
-        <span id="error-text">Invalid username or password.</span>
+        <span id="error-text">Invalid email or password.</span>
       </div>
     </div>
 
     <div class="login-footer">clientmgr &mdash; internal use only</div>
   </div>
 
-  <script>
+  <script type="module">
+    import { initializeApp }        from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged }
+      from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
+
     // =====================
-    // Users
-    // Add or edit credentials here.
-    // For a real deployment, move this check to a backend.
+    // Firebase config
     // =====================
-    const USERS = {
-      'chris':     'password123',
-      'colleague': 'pass456',
+    const firebaseConfig = {
+      apiKey:            "AIzaSyBJii3XONCMHHDpm9TrqYwHKZ4rJSEb_CI",
+      authDomain:        "clientmgr-b66ae.firebaseapp.com",
+      projectId:         "clientmgr-b66ae",
+      storageBucket:     "clientmgr-b66ae.firebasestorage.app",
+      messagingSenderId: "416134439201",
+      appId:             "1:416134439201:web:a2482a79088e9ee0d5de60"
     };
 
-    // Redirect to dashboard if already logged in
-    if (localStorage.getItem('auth') === 'true') {
-      window.location.href = 'index.html';
-    }
+    const app  = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
 
-    const usernameInput = document.getElementById('username');
+    // Redirect if already logged in
+    onAuthStateChanged(auth, user => {
+      if (user) window.location.href = 'index.html';
+    });
+
+    // DOM
+    const emailInput    = document.getElementById('email');
     const passwordInput = document.getElementById('password');
     const loginBtn      = document.getElementById('login-btn');
     const errorMsg      = document.getElementById('error-msg');
     const errorText     = document.getElementById('error-text');
 
-    function attemptLogin() {
-      const username = usernameInput.value.trim();
-      const password = passwordInput.value;
-
-      if (!username || !password) {
-        showError('Please enter your username and password.');
-        return;
-      }
-
-      if (USERS[username] && USERS[username] === password) {
-        localStorage.setItem('auth', 'true');
-        localStorage.setItem('authUser', username);
-        window.location.href = 'index.html';
-      } else {
-        showError('Invalid username or password.');
-        passwordInput.value = '';
-        passwordInput.focus();
-      }
-    }
-
     function showError(msg) {
       errorText.textContent = msg;
       errorMsg.classList.add('visible');
-      setTimeout(() => errorMsg.classList.remove('visible'), 3000);
+      setTimeout(() => errorMsg.classList.remove('visible'), 4000);
+    }
+
+    function setLoading(loading) {
+      loginBtn.disabled = loading;
+      loginBtn.innerHTML = loading
+        ? '<i class="ti ti-loader-2" style="animation:spin 1s linear infinite"></i> Signing in...'
+        : '<i class="ti ti-login"></i> Sign in';
+    }
+
+    async function attemptLogin() {
+      const email    = emailInput.value.trim();
+      const password = passwordInput.value;
+
+      if (!email || !password) {
+        showError('Please enter your email and password.');
+        return;
+      }
+
+      setLoading(true);
+
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+        // onAuthStateChanged will handle the redirect
+      } catch (err) {
+        setLoading(false);
+        passwordInput.value = '';
+        passwordInput.focus();
+
+        switch (err.code) {
+          case 'auth/user-not-found':
+          case 'auth/wrong-password':
+          case 'auth/invalid-credential':
+            showError('Invalid email or password.');
+            break;
+          case 'auth/too-many-requests':
+            showError('Too many attempts. Try again later.');
+            break;
+          case 'auth/invalid-email':
+            showError('Please enter a valid email address.');
+            break;
+          default:
+            showError('Something went wrong. Please try again.');
+        }
+      }
     }
 
     loginBtn.addEventListener('click', attemptLogin);
 
-    // Allow Enter key to submit
-    [usernameInput, passwordInput].forEach(input => {
+    [emailInput, passwordInput].forEach(input => {
       input.addEventListener('keydown', e => {
         if (e.key === 'Enter') attemptLogin();
       });
     });
 
-    // Focus username on load
-    usernameInput.focus();
+    emailInput.focus();
   </script>
+
+  <style>
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
 
 </body>
 </html>

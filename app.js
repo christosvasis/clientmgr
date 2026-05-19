@@ -1,19 +1,37 @@
 // =====================
-// Auth Guard
-// Redirect to login if not authenticated.
+// Firebase Auth
 // =====================
-if (localStorage.getItem('auth') !== 'true') {
-  window.location.href = 'login.html';
-}
+import { initializeApp }   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
+import { getAuth, onAuthStateChanged, signOut }
+  from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
 
-// Show logged-in username in topbar
-const authUser = localStorage.getItem('authUser') || 'user';
-const topbarUser = document.querySelector('.topbar-user');
-if (topbarUser) topbarUser.textContent = authUser + '@clientmgr';
+const firebaseConfig = {
+  apiKey:            "AIzaSyBJii3XONCMHHDpm9TrqYwHKZ4rJSEb_CI",
+  authDomain:        "clientmgr-b66ae.firebaseapp.com",
+  projectId:         "clientmgr-b66ae",
+  storageBucket:     "clientmgr-b66ae.firebasestorage.app",
+  messagingSenderId: "416134439201",
+  appId:             "1:416134439201:web:a2482a79088e9ee0d5de60"
+};
 
-// Avatar initials
-const avatarEl = document.querySelector('.avatar');
-if (avatarEl) avatarEl.textContent = authUser.slice(0, 2).toUpperCase();
+const firebaseApp = initializeApp(firebaseConfig);
+const auth        = getAuth(firebaseApp);
+
+// Auth guard — redirect to login if not signed in
+onAuthStateChanged(auth, user => {
+  if (!user) {
+    window.location.href = 'login.html';
+    return;
+  }
+
+  // Show logged-in email in topbar
+  const topbarUser = document.querySelector('.topbar-user');
+  if (topbarUser) topbarUser.textContent = user.email;
+
+  // Avatar initials from email
+  const avatarEl = document.querySelector('.avatar');
+  if (avatarEl) avatarEl.textContent = user.email.slice(0, 2).toUpperCase();
+});
 
 
 // =====================
@@ -79,9 +97,9 @@ renderRecent();
 // =====================
 // Logout
 document.getElementById('logout-btn').addEventListener('click', () => {
-  localStorage.removeItem('auth');
-  localStorage.removeItem('authUser');
-  window.location.href = 'login.html';
+  signOut(auth).then(() => {
+    window.location.href = 'login.html';
+  });
 });
 
 
