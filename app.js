@@ -131,7 +131,10 @@ document.querySelectorAll('.nav-item[data-view]').forEach(item => {
     document.getElementById('view-' + view).classList.add('active');
 
     if (view === 'dashboard') setTimeout(() => searchInput.focus(), 50);
-    if (view === 'admin')     renderAdminClients();
+    if (view === 'admin') {
+      renderAdminClients();
+      renderAdminUsers();
+    }
   });
 });
 
@@ -415,6 +418,184 @@ async function deleteClient(id, name) {
     renderAdminClients();
   } catch (e) {
     alert('Failed to delete client.');
+  }
+}
+
+
+// =====================
+// User Management
+// =====================
+async function getToken() {
+  return await auth.currentUser.getIdToken();
+}
+
+async function renderAdminUsers() {
+  if (!isAdmin) return;
+
+  const userTable   = document.getElementById('admin-user-table');
+  const userTbody   = document.getElementById('admin-user-tbody');
+  const userLoading = document.getElementById('admin-users-loading');
+
+  userLoading.style.display = 'block';
+  userTable.style.display   = 'none';
+
+  try {
+    const token = await getToken();
+    const res   = await fetch('/api/list-users', {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    const data  = await res.json();
+
+    if (!res.ok) throw new Error(data.error);
+
+    const users = data.users.sort((a, b) => a.email.localeCompare(b.email));
+
+    userTbody.innerHTML = users.map(u => `
+      <tr>
+        <td class="client-name-text">${u.email}</td>
+        <td>
+          <input type="checkbox"
+                 class="role-checkbox"
+                 data-uid="${u.uid}"
+                 data-role="isPowerUser"
+                 style="accent-color:var(--accent)"
+                 ${u.isPowerUser ? 'checked' : ''} />
+        </td>
+        <td>
+          <input type="checkbox"
+                 class="role-checkbox"
+                 data-uid="${u.uid}"
+                 data-role="isAdmin"
+                 style="accent-color:var(--accent)"
+                 ${u.isAdmin ? 'checked' : ''} />
+        </td>
+        <td>
+          <button class="notes-btn delete-user-btn"
+                  data-uid="${u.uid}"
+                  data-email="${u.email}"
+                  title="Delete user">
+            <i class="ti ti-trash" style="color:var(--danger)"></i>
+          </button>
+        </td>
+      </tr>
+    `).join('');
+
+    // Role toggle
+    userTbody.querySelectorAll('.role-checkbox').forEach(cb => {
+      cb.addEventListener('change', () => updateUserRole(cb));
+    });
+
+    // Delete user
+    userTbody.querySelectorAll('.delete-user-btn').forEach(btn => {
+      btn.addEventListener('click', () => deleteUser(btn.dataset.uid, btn.dataset.email));
+    });
+
+    userLoading.style.display = 'none';
+    userTable.style.display   = '';
+
+  } catch (e) {
+    userLoading.innerHTML = `<span style="color:var(--danger)">Failed to load users: ${e.message}</span>`;
+  }
+}
+
+// Add user
+document.getElementById('admin-add-user').addEventListener('click', async () => {
+  const emailInput    = document.getElementById('admin-user-email');
+  const passwordInput = document.getElementById('admin-user-password');
+  const isPowerUser   = document.getElementById('admin-user-poweruser').checked;
+  const isAdminUser   = document.getElementById('admin-user-isadmin').checked;
+  const confirmEl     = document.getElementById('admin-user-confirm');
+  const errorEl       = document.getElementById('admin-user-error');
+
+  const email    = emailInput.value.trim();
+  const password = passwordInput.value;
+
+  if (!email || !password) {
+    errorEl.textContent   = 'Email and password are required.';
+    errorEl.style.opacity = '1';
+    setTimeout(() => errorEl.style.opacity = '0', 3000);
+    return;
+  }
+
+  try {
+    const token = await getToken();
+    const res   = await fetch('/api/create-user', {
+      method:  'POST',
+      headers: {
+        'Content-Type':  'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ email, password, isAdmin: isAdminUser, isPowerUser })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+
+    emailInput.value    = '';
+    passwordInput.value = '';
+    document.getElementById('admin-user-poweruser').checked = false;
+    document.getElementById('admin-user-isadmin').checked   = false;
+
+    confirmEl.style.opacity = '1';
+    setTimeout(() => confirmEl.style.opacity = '0', 2000);
+    renderAdminUsers();
+
+  } catch (e) {
+    errorEl.textContent   = e.message || 'Failed to create user.';
+    errorEl.style.opacity = '1';
+    setTimeout(() => errorEl.style.opacity = '0', 4000);
+  }
+});
+
+// Update role
+async function updateUserRole(checkbox) {
+  const uid  = checkbox.dataset.uid;
+  const role = checkbox.dataset.role;
+
+  // Get current values for this row
+  const row         = checkbox.closest('tr');
+  const checkboxes  = row.querySelectorAll('.role-checkbox');
+  const roles       = {};
+  checkboxes.forEach(cb => roles[cb.dataset.role] = cb.checked);
+
+  try {
+    const token = await getToken();
+    const res   = await fetch('/api/update-user', {
+      method:  'POST',
+      headers: {
+        'Content-Type':  'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ uid, ...roles })
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      checkbox.checked = !checkbox.checked; // revert
+      alert(data.error);
+    }
+  } catch (e) {
+    checkbox.checked = !checkbox.checked; // revert
+    alert('Failed to update user.');
+  }
+}
+
+// Delete user
+async function deleteUser(uid, email) {
+  if (!confirm(`Delete "${email}"? This cannot be undone.`)) return;
+  try {
+    const token = await getToken();
+    const res   = await fetch('/api/delete-user', {
+      method:  'POST',
+      headers: {
+        'Content-Type':  'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ uid })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+    renderAdminUsers();
+  } catch (e) {
+    alert(e.message || 'Failed to delete user.');
   }
 }
 
