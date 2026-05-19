@@ -151,18 +151,29 @@ let currentZoom = parseInt(localStorage.getItem(ZOOM_KEY) || '100', 10);
 
 function applyZoom(zoom) {
   currentZoom = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, zoom));
-  document.documentElement.style.fontSize = `${currentZoom}%`;
+  // Scale the entire page using transform on body
+  const scale = currentZoom / 100;
+  document.body.style.transform       = `scale(${scale})`;
+  document.body.style.transformOrigin = 'top left';
+  document.body.style.width           = `${100 / scale}%`;
+  document.body.style.height          = `${100 / scale}vh`;
   localStorage.setItem(ZOOM_KEY, currentZoom);
   const label = document.getElementById('zoom-label');
   if (label) label.textContent = `${currentZoom}%`;
 }
 
-// Apply on load
+// Apply on load immediately
 applyZoom(currentZoom);
 
-document.getElementById('zoom-in').addEventListener('click',    () => applyZoom(currentZoom + ZOOM_STEP));
-document.getElementById('zoom-out').addEventListener('click',   () => applyZoom(currentZoom - ZOOM_STEP));
-document.getElementById('zoom-reset').addEventListener('click', () => applyZoom(100));
+// Wire up buttons after DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+  const zoomIn    = document.getElementById('zoom-in');
+  const zoomOut   = document.getElementById('zoom-out');
+  const zoomReset = document.getElementById('zoom-reset');
+  if (zoomIn)    zoomIn.addEventListener('click',    () => applyZoom(currentZoom + ZOOM_STEP));
+  if (zoomOut)   zoomOut.addEventListener('click',   () => applyZoom(currentZoom - ZOOM_STEP));
+  if (zoomReset) zoomReset.addEventListener('click', () => applyZoom(100));
+});
 
 
 // =====================
