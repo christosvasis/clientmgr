@@ -7,7 +7,7 @@ import { getAuth, onAuthStateChanged, signOut }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
 import {
   getFirestore, collection, getDocs, getDoc,
-  addDoc, deleteDoc, doc, query, orderBy
+  addDoc, deleteDoc, updateDoc, doc, query, orderBy
 } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -137,6 +137,32 @@ document.querySelectorAll('.nav-item[data-view]').forEach(item => {
     }
   });
 });
+
+
+// =====================
+// Zoom
+// =====================
+const ZOOM_KEY  = 'uiZoom';
+const ZOOM_MIN  = 80;
+const ZOOM_MAX  = 130;
+const ZOOM_STEP = 5;
+
+let currentZoom = parseInt(localStorage.getItem(ZOOM_KEY) || '100', 10);
+
+function applyZoom(zoom) {
+  currentZoom = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, zoom));
+  document.documentElement.style.fontSize = `${currentZoom}%`;
+  localStorage.setItem(ZOOM_KEY, currentZoom);
+  const label = document.getElementById('zoom-label');
+  if (label) label.textContent = `${currentZoom}%`;
+}
+
+// Apply on load
+applyZoom(currentZoom);
+
+document.getElementById('zoom-in').addEventListener('click',    () => applyZoom(currentZoom + ZOOM_STEP));
+document.getElementById('zoom-out').addEventListener('click',   () => applyZoom(currentZoom - ZOOM_STEP));
+document.getElementById('zoom-reset').addEventListener('click', () => applyZoom(100));
 
 
 // =====================
@@ -358,10 +384,15 @@ async function renderAdminClients() {
   await loadClients();
 
   adminTbody.innerHTML = clients.map(c => `
-    <tr>
+    <tr id="client-row-${c.id}">
       <td class="client-name-text">${c.name}</td>
       <td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text3)">${c.path}</td>
-      <td>
+      <td style="display:flex;gap:6px">
+        <button class="notes-btn edit-client-btn"
+                data-id="${c.id}" data-name="${c.name}" data-path="${c.path}"
+                title="Edit client">
+          <i class="ti ti-pencil"></i>
+        </button>
         <button class="notes-btn delete-client-btn"
                 data-id="${c.id}" data-name="${c.name}"
                 title="Delete client">
@@ -369,7 +400,49 @@ async function renderAdminClients() {
         </button>
       </td>
     </tr>
+    <tr id="client-edit-row-${c.id}" style="display:none">
+      <td>
+        <input class="settings-input edit-name-input"
+               data-id="${c.id}" value="${c.name}"
+               style="padding:5px 8px;font-size:12px" />
+      </td>
+      <td>
+        <input class="settings-input edit-path-input"
+               data-id="${c.id}" value="${c.path}"
+               style="padding:5px 8px;font-size:12px;font-family:'DM Mono',monospace" />
+      </td>
+      <td style="display:flex;gap:6px">
+        <button class="save-btn save-client-btn"
+                data-id="${c.id}"
+                style="padding:4px 10px;font-size:11px;margin-top:0">
+          Save
+        </button>
+        <button class="notes-btn cancel-edit-btn"
+                data-id="${c.id}"
+                title="Cancel">
+          <i class="ti ti-x"></i>
+        </button>
+      </td>
+    </tr>
   `).join('');
+
+  adminTbody.querySelectorAll('.edit-client-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.getElementById(`client-row-${btn.dataset.id}`).style.display      = 'none';
+      document.getElementById(`client-edit-row-${btn.dataset.id}`).style.display = '';
+    });
+  });
+
+  adminTbody.querySelectorAll('.cancel-edit-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.getElementById(`client-row-${btn.dataset.id}`).style.display      = '';
+      document.getElementById(`client-edit-row-${btn.dataset.id}`).style.display = 'none';
+    });
+  });
+
+  adminTbody.querySelectorAll('.save-client-btn').forEach(btn => {
+    btn.addEventListener('click', () => saveClientEdit(btn.dataset.id));
+  });
 
   adminTbody.querySelectorAll('.delete-client-btn').forEach(btn => {
     btn.addEventListener('click', () => deleteClient(btn.dataset.id, btn.dataset.name));
@@ -418,6 +491,33 @@ async function deleteClient(id, name) {
     renderAdminClients();
   } catch (e) {
     alert('Failed to delete client.');
+  }
+}
+
+// Edit client
+async function saveClientEdit(id) {
+  const nameInput = document.querySelector(`.edit-name-input[data-id="${id}"]`);
+  const pathInput = document.querySelector(`.edit-path-input[data-id="${id}"]`);
+
+  const name = nameInput.value.trim();
+  const path = pathInput.value.trim();
+
+  if (!name || !path) {
+    alert('Both name and path are required.');
+    return;
+  }
+
+  const saveBtn = document.querySelector(`.save-client-btn[data-id="${id}"]`);
+  saveBtn.textContent = 'Saving...';
+  saveBtn.disabled    = true;
+
+  try {
+    await updateDoc(doc(db, 'clients', id), { name, path });
+    renderAdminClients();
+  } catch (e) {
+    alert('Failed to save changes.');
+    saveBtn.textContent = 'Save';
+    saveBtn.disabled    = false;
   }
 }
 
