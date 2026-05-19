@@ -28,6 +28,10 @@ html, body {
   height: 100%;
 }
 
+html {
+  font-size: 18px; /* base — zoom scales this via JS */
+}
+
 body {
   background: var(--bg);
   color: var(--text);

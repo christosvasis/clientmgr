@@ -123,6 +123,26 @@
       <div class="page-title">Settings</div>
       <div class="page-sub">Configure your workspace</div>
 
+      <div class="settings-title">Appearance</div>
+      <div class="settings-card">
+        <div class="settings-label">Interface zoom</div>
+        <div style="display:flex;align-items:center;gap:12px;margin-top:4px">
+          <button class="notes-btn" id="zoom-out" title="Zoom out">
+            <i class="ti ti-minus"></i>
+          </button>
+          <div style="font-size:13px;color:var(--text);font-family:'DM Mono',monospace;min-width:40px;text-align:center" id="zoom-label">100%</div>
+          <button class="notes-btn" id="zoom-in" title="Zoom in">
+            <i class="ti ti-plus"></i>
+          </button>
+          <button class="notes-btn" id="zoom-reset" title="Reset zoom" style="margin-left:4px;font-size:11px;padding:5px 10px">
+            Reset
+          </button>
+        </div>
+        <div class="settings-desc" style="margin-top:8px">
+          Adjusts the size of all text and UI elements. Saved between sessions.
+        </div>
+      </div>
+
       <div class="settings-title">Paths</div>
       <div class="settings-card">
         <div class="settings-label">Base path</div>
@@ -203,7 +223,7 @@
             <tr>
               <th>Name</th>
               <th>Folder path</th>
-              <th></th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody id="admin-client-tbody"></tbody>
