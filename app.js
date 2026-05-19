@@ -1,9 +1,14 @@
 // =====================
-// Firebase Auth
+// Firebase
 // =====================
-import { initializeApp }   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
+import { initializeApp }
+  from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
+import {
+  getFirestore, collection, getDocs, getDoc,
+  addDoc, deleteDoc, doc, query, orderBy
+} from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey:            "AIzaSyBJii3XONCMHHDpm9TrqYwHKZ4rJSEb_CI",
@@ -16,90 +21,99 @@ const firebaseConfig = {
 
 const firebaseApp = initializeApp(firebaseConfig);
 const auth        = getAuth(firebaseApp);
-
-// Auth guard — redirect to login if not signed in
-onAuthStateChanged(auth, user => {
-  if (!user) {
-    window.location.href = 'login.html';
-    return;
-  }
-
-  // Show logged-in email in topbar
-  const topbarUser = document.querySelector('.topbar-user');
-  if (topbarUser) topbarUser.textContent = user.email;
-
-  // Avatar initials from email
-  const avatarEl = document.querySelector('.avatar');
-  if (avatarEl) avatarEl.textContent = user.email.slice(0, 2).toUpperCase();
-});
+const db          = getFirestore(firebaseApp);
 
 
 // =====================
-// Client Data
-// Replace these with your real clients.
-// 'path' is the subfolder name inside basePath.
+// State
 // =====================
-const clients = [
-  { name: "Acme Corp",     path: "acme_corp"     },
-  { name: "Blue Ridge",    path: "blue_ridge"    },
-  { name: "Client Alpha",  path: "client_alpha"  },
-  { name: "Client Beta",   path: "client_beta"   },
-  { name: "Delta Systems", path: "delta_systems" },
-  { name: "Echo Works",    path: "echo_works"    },
-  { name: "Foxwell Inc",   path: "foxwell_inc"   },
-  { name: "Green Valley",  path: "green_valley"  },
-].sort((a, b) => a.name.localeCompare(b.name));
-
-
-// =====================
-// State (persisted via localStorage)
-// =====================
+let clients      = [];
+let isAdmin      = false;
 let basePath     = localStorage.getItem('basePath')     || '/project/';
 let recentlyUsed = JSON.parse(localStorage.getItem('recentlyUsed') || '[]');
 let lastLaunched = JSON.parse(localStorage.getItem('lastLaunched')  || '{}');
 let notes        = JSON.parse(localStorage.getItem('notes')         || '{}');
-let openNotes    = new Set(); // not persisted — resets on page load
+let openNotes    = new Set();
 
 
 // =====================
 // DOM References
 // =====================
-const searchInput  = document.getElementById('search');
-const clearBtn     = document.getElementById('clear-btn');
-const searchHint   = document.getElementById('search-hint');
-const idleState    = document.getElementById('idle-state');
-const emptyState   = document.getElementById('empty-state');
-const emptyTerm    = document.getElementById('empty-term');
-const clientTable  = document.getElementById('client-table');
-const tbody        = document.getElementById('client-tbody');
-const resultCount  = document.getElementById('result-count');
-const launchMsg    = document.getElementById('launch-msg');
-const recentSec    = document.getElementById('recent-section');
-const recentChips  = document.getElementById('recent-chips');
+const searchInput   = document.getElementById('search');
+const clearBtn      = document.getElementById('clear-btn');
+const searchHint    = document.getElementById('search-hint');
+const idleState     = document.getElementById('idle-state');
+const emptyState    = document.getElementById('empty-state');
+const emptyTerm     = document.getElementById('empty-term');
+const clientTable   = document.getElementById('client-table');
+const tbody         = document.getElementById('client-tbody');
+const resultCount   = document.getElementById('result-count');
+const launchMsg     = document.getElementById('launch-msg');
+const recentSec     = document.getElementById('recent-section');
+const recentChips   = document.getElementById('recent-chips');
 const basePathInput = document.getElementById('base-path-input');
-const saveBtn      = document.getElementById('save-settings');
-const saveConfirm  = document.getElementById('save-confirm');
+const saveBtn       = document.getElementById('save-settings');
+const saveConfirm   = document.getElementById('save-confirm');
 
 
 // =====================
-// Init
+// Auth Guard
 // =====================
-document.getElementById('today-date').textContent = new Date().toLocaleDateString('en-GB', {
-  weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+onAuthStateChanged(auth, async user => {
+  if (!user) {
+    window.location.href = 'login.html';
+    return;
+  }
+
+  // Update topbar
+  const topbarUser = document.querySelector('.topbar-user');
+  if (topbarUser) topbarUser.textContent = user.email;
+  const avatarEl = document.querySelector('.avatar');
+  if (avatarEl) avatarEl.textContent = user.email.slice(0, 2).toUpperCase();
+
+  // Check if user is admin
+  try {
+    const userDoc = await getDoc(doc(db, 'users', user.uid));
+    if (userDoc.exists() && userDoc.data().isAdmin === true) {
+      isAdmin = true;
+      document.getElementById('admin-nav').style.display = 'flex';
+    }
+  } catch (e) {
+    console.warn('Could not check admin status:', e);
+  }
+
+  // Load clients from Firestore
+  await loadClients();
+
+  // Init
+  document.getElementById('today-date').textContent = new Date().toLocaleDateString('en-GB', {
+    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+  });
+  basePathInput.value = basePath;
+  renderRecent();
 });
 
-basePathInput.value = basePath;
-renderRecent();
-
 
 // =====================
-// Navigation
+// Load Clients from Firestore
+// =====================
+async function loadClients() {
+  try {
+    const q    = query(collection(db, 'clients'), orderBy('name'));
+    const snap = await getDocs(q);
+    clients    = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  } catch (e) {
+    console.error('Failed to load clients:', e);
+    clients = [];
+  }
+}
+
+
 // =====================
 // Logout
+// =====================
 document.getElementById('logout-btn').addEventListener('click', () => {
-  signOut(auth).then(() => {
-    window.location.href = 'login.html';
-  });
+  signOut(auth).then(() => window.location.href = 'login.html');
 });
 
 
@@ -116,9 +130,8 @@ document.querySelectorAll('.nav-item[data-view]').forEach(item => {
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
     document.getElementById('view-' + view).classList.add('active');
 
-    if (view === 'dashboard') {
-      setTimeout(() => searchInput.focus(), 50);
-    }
+    if (view === 'dashboard') setTimeout(() => searchInput.focus(), 50);
+    if (view === 'admin')     renderAdminClients();
   });
 });
 
@@ -153,7 +166,6 @@ document.addEventListener('keydown', e => {
   const tag = document.activeElement.tagName;
   if (e.key === '/' && tag !== 'INPUT' && tag !== 'TEXTAREA') {
     e.preventDefault();
-    // Switch to dashboard view
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
     document.querySelector('[data-nav="dashboard"]').classList.add('active');
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
@@ -167,23 +179,17 @@ document.addEventListener('keydown', e => {
 // Launch
 // =====================
 function launch(clientName, software) {
-  // Record timestamp and update recently used
   lastLaunched[clientName] = Date.now();
   localStorage.setItem('lastLaunched', JSON.stringify(lastLaunched));
-
   addRecent(clientName);
 
-  // Show launch message
-  const client = clients.find(c => c.name === clientName);
-  const swLabel = software === 'sw_a' ? 'Software A' : 'Software B';
+  const client   = clients.find(c => c.name === clientName);
+  const swLabel  = software === 'sw_a' ? 'Software A' : 'Software B';
   const fullPath = `${basePath}${client.path}/${software}.exe`;
   showLaunchMsg(`Launched ${swLabel} → ${fullPath}`);
 
-  // Re-render to update timestamp
   render(searchInput.value);
 
-  // Fire the protocol handler.
-  // This triggers the "Open ClientMgr Launcher?" popup in the browser.
   const protocolUrl = `clientmgr://launch/${client.path}/${software}`;
   const a = document.createElement('a');
   a.href = protocolUrl;
@@ -197,13 +203,8 @@ function launch(clientName, software) {
 // Notes
 // =====================
 function toggleNotes(clientName) {
-  if (openNotes.has(clientName)) {
-    openNotes.delete(clientName);
-  } else {
-    openNotes.add(clientName);
-  }
+  openNotes.has(clientName) ? openNotes.delete(clientName) : openNotes.add(clientName);
   render(searchInput.value);
-
   if (openNotes.has(clientName)) {
     setTimeout(() => {
       const ta = document.getElementById('ta_' + safeId(clientName));
@@ -223,17 +224,11 @@ function addRecent(clientName) {
 }
 
 function renderRecent() {
-  if (!recentlyUsed.length) {
-    recentSec.style.display = 'none';
-    return;
-  }
+  if (!recentlyUsed.length) { recentSec.style.display = 'none'; return; }
   recentSec.style.display = 'block';
   recentChips.innerHTML = recentlyUsed.map(name =>
-    `<div class="chip" data-name="${name}">
-      <span class="chip-dot"></span>${name}
-    </div>`
+    `<div class="chip" data-name="${name}"><span class="chip-dot"></span>${name}</div>`
   ).join('');
-
   recentChips.querySelectorAll('.chip').forEach(chip => {
     chip.addEventListener('click', () => {
       searchInput.value = chip.dataset.name;
@@ -245,13 +240,13 @@ function renderRecent() {
 
 
 // =====================
-// Render Table
+// Render Dashboard Table
 // =====================
 function render(query) {
   const q = query.trim();
 
-  clearBtn.style.display  = q ? 'block' : 'none';
-  searchHint.style.display = q ? 'none' : 'flex';
+  clearBtn.style.display   = q ? 'block' : 'none';
+  searchHint.style.display = q ? 'none'  : 'flex';
 
   if (!q) {
     idleState.style.display   = 'block';
@@ -279,8 +274,7 @@ function render(query) {
     const ts  = lastLaunched[c.name];
     const sub = ts
       ? `<div class="client-sub">
-           <i class="ti ti-clock" style="font-size:10px"></i>
-           ${timeAgo(ts)}
+           <i class="ti ti-clock" style="font-size:10px"></i> ${timeAgo(ts)}
          </div>`
       : '';
 
@@ -290,27 +284,21 @@ function render(query) {
     const mainRow = `
       <tr class="client-row">
         <td>
-          <div class="client-name-text">${highlight(c.name, q)}</div>
-          ${sub}
+          <div class="client-name-text">${highlight(c.name, q)}</div>${sub}
         </td>
         <td>
           <button class="notes-btn ${notesOpen ? 'open' : ''}"
-                  data-client="${c.name}"
-                  title="Toggle notes">
+                  data-client="${c.name}" title="Toggle notes">
             <i class="ti ti-notes"></i>
           </button>
         </td>
         <td>
-          <button class="launch-btn btn-a"
-                  data-client="${c.name}"
-                  data-sw="sw_a">
+          <button class="launch-btn btn-a" data-client="${c.name}" data-sw="sw_a">
             <i class="ti ti-player-play" style="font-size:11px"></i> Launch
           </button>
         </td>
         <td>
-          <button class="launch-btn btn-b"
-                  data-client="${c.name}"
-                  data-sw="sw_b">
+          <button class="launch-btn btn-b" data-client="${c.name}" data-sw="sw_b">
             <i class="ti ti-player-play" style="font-size:11px"></i> Launch
           </button>
         </td>
@@ -320,8 +308,7 @@ function render(query) {
       <tr class="notes-row">
         <td colspan="4">
           <div class="notes-inner">
-            <textarea
-              class="notes-textarea"
+            <textarea class="notes-textarea"
               id="ta_${safeId(c.name)}"
               data-client="${c.name}"
               placeholder="Notes for ${c.name}..."
@@ -333,25 +320,102 @@ function render(query) {
     return mainRow + notesRow;
   }).join('');
 
-  // Wire up buttons and textareas
-  tbody.querySelectorAll('.launch-btn').forEach(btn => {
-    btn.addEventListener('click', () => launch(btn.dataset.client, btn.dataset.sw));
-  });
-
-  tbody.querySelectorAll('.notes-btn').forEach(btn => {
-    btn.addEventListener('click', () => toggleNotes(btn.dataset.client));
-  });
-
-  tbody.querySelectorAll('.notes-textarea').forEach(ta => {
+  tbody.querySelectorAll('.launch-btn').forEach(btn =>
+    btn.addEventListener('click', () => launch(btn.dataset.client, btn.dataset.sw))
+  );
+  tbody.querySelectorAll('.notes-btn').forEach(btn =>
+    btn.addEventListener('click', () => toggleNotes(btn.dataset.client))
+  );
+  tbody.querySelectorAll('.notes-textarea').forEach(ta =>
     ta.addEventListener('input', () => {
       notes[ta.dataset.client] = ta.value;
       localStorage.setItem('notes', JSON.stringify(notes));
-    });
-  });
+    })
+  );
 
   clientTable.style.display = '';
   emptyState.style.display  = 'none';
   resultCount.textContent   = `${filtered.length} client${filtered.length !== 1 ? 's' : ''} found`;
+}
+
+
+// =====================
+// Admin Panel
+// =====================
+async function renderAdminClients() {
+  if (!isAdmin) return;
+
+  const adminTable   = document.getElementById('admin-client-table');
+  const adminTbody   = document.getElementById('admin-client-tbody');
+  const adminLoading = document.getElementById('admin-loading');
+
+  adminLoading.style.display = 'block';
+  adminTable.style.display   = 'none';
+
+  await loadClients();
+
+  adminTbody.innerHTML = clients.map(c => `
+    <tr>
+      <td class="client-name-text">${c.name}</td>
+      <td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text3)">${c.path}</td>
+      <td>
+        <button class="notes-btn delete-client-btn"
+                data-id="${c.id}" data-name="${c.name}"
+                title="Delete client">
+          <i class="ti ti-trash" style="color:var(--danger)"></i>
+        </button>
+      </td>
+    </tr>
+  `).join('');
+
+  adminTbody.querySelectorAll('.delete-client-btn').forEach(btn => {
+    btn.addEventListener('click', () => deleteClient(btn.dataset.id, btn.dataset.name));
+  });
+
+  adminLoading.style.display = 'none';
+  adminTable.style.display   = '';
+}
+
+// Add client
+document.getElementById('admin-add-client').addEventListener('click', async () => {
+  const nameInput  = document.getElementById('admin-client-name');
+  const pathInput  = document.getElementById('admin-client-path');
+  const addConfirm = document.getElementById('admin-add-confirm');
+  const addError   = document.getElementById('admin-add-error');
+
+  const name = nameInput.value.trim();
+  const path = pathInput.value.trim();
+
+  if (!name || !path) {
+    addError.textContent   = 'Both fields are required.';
+    addError.style.opacity = '1';
+    setTimeout(() => addError.style.opacity = '0', 3000);
+    return;
+  }
+
+  try {
+    await addDoc(collection(db, 'clients'), { name, path });
+    nameInput.value          = '';
+    pathInput.value          = '';
+    addConfirm.style.opacity = '1';
+    setTimeout(() => addConfirm.style.opacity = '0', 2000);
+    renderAdminClients();
+  } catch (e) {
+    addError.textContent   = 'Failed to add client.';
+    addError.style.opacity = '1';
+    setTimeout(() => addError.style.opacity = '0', 3000);
+  }
+});
+
+// Delete client
+async function deleteClient(id, name) {
+  if (!confirm(`Delete "${name}"? This cannot be undone.`)) return;
+  try {
+    await deleteDoc(doc(db, 'clients', id));
+    renderAdminClients();
+  } catch (e) {
+    alert('Failed to delete client.');
+  }
 }
 
 
@@ -385,7 +449,7 @@ function safeId(name) {
 }
 
 function showLaunchMsg(msg) {
-  launchMsg.textContent  = msg;
+  launchMsg.textContent   = msg;
   launchMsg.style.opacity = '1';
   setTimeout(() => launchMsg.style.opacity = '0', 3000);
 }
