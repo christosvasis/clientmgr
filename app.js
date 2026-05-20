@@ -636,7 +636,9 @@ async function renderAdminUsers() {
 
     if (!res.ok) throw new Error(data.error);
 
-    const users = data.users.sort((a, b) => a.email.localeCompare(b.email));
+    const users = data.users.sort((a, b) =>
+      (a.email || '').localeCompare(b.email || '')
+    );
 
     userTbody.innerHTML = users.map(u => {
       const status = u.status || 'approved';
@@ -648,7 +650,7 @@ async function renderAdminUsers() {
 
       return `
       <tr>
-        <td class="client-name-text">${u.email}</td>
+        <td class="client-name-text">${u.email || '<span style="color:var(--text3);font-style:italic">no email</span>'}</td>
         <td>${statusBadge}</td>
         <td>
           <input type="checkbox"
@@ -669,7 +671,7 @@ async function renderAdminUsers() {
         <td>
           <button class="notes-btn delete-user-btn"
                   data-uid="${u.uid}"
-                  data-email="${u.email}"
+                  data-email="${u.email || ''}"
                   title="Delete user">
             <i class="ti ti-trash" style="color:var(--danger)"></i>
           </button>
