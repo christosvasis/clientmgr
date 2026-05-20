@@ -46,9 +46,10 @@ body {
    ===================== */
 .layout {
   display: grid;
-  grid-template-columns: 13rem 1fr;
-  grid-template-rows: 3.2rem auto;
-  min-height: 100vh;
+  grid-template-columns: 200px 1fr;  /* px so sidebar never changes with zoom */
+  grid-template-rows: 52px 1fr;      /* px so topbar never changes with zoom */
+  height: 100vh;                     /* exact viewport height, not min */
+  overflow: hidden;                  /* prevent page-level scroll */
 }
 
 /* =====================
@@ -62,6 +63,8 @@ body {
   align-items: center;
   padding: 0 1.5rem;
   gap: 0.75rem;
+  height: 52px;        /* fixed px height */
+  flex-shrink: 0;
 }
 
 .logo {
@@ -109,51 +112,55 @@ body {
 .sidebar {
   background: var(--bg2);
   border-right: 1px solid var(--border);
-  padding: 1rem 0;
+  width: 200px;           /* fixed px width */
+  height: calc(100vh - 52px); /* fixed px height minus topbar */
   display: flex;
   flex-direction: column;
-  overflow-y: auto;  /* scroll when content overflows on zoom */
+  overflow: hidden;       /* never scroll, never overflow */
+  flex-shrink: 0;
+  padding: 12px 0;        /* px padding so it doesn't scale with zoom */
 }
 
-.sidebar-top  { flex: 1; }
+.sidebar-top  { flex: 1; min-height: 0; }
 
-/* Remove margin-top:auto — sidebar-bottom flows naturally when zoomed */
-.sidebar-bottom { margin-top: 1rem; }
+/* margin-top: auto pushes bottom section down */
+.sidebar-bottom { margin-top: auto; }
 
 .nav-label {
-  font-size: 0.65rem;
+  font-size: 11px;     /* px so sidebar labels don't scale */
   font-weight: 500;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--text3);
-  padding: 0 1rem;
-  margin-bottom: 0.4rem;
+  padding: 0 16px;
+  margin-bottom: 4px;
 }
 
 .nav-divider {
   height: 1px;
   background: var(--border);
-  margin: 0.5rem 0 0.75rem;
+  margin: 6px 0 10px;
 }
 
 .nav-item {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
-  padding: 0.6rem 1rem;
-  font-size: 0.85rem;
+  gap: 10px;
+  padding: 9px 16px;   /* px so nav items don't scale with zoom */
+  font-size: 13px;     /* px so nav items stay same size */
   color: var(--text2);
   cursor: pointer;
   transition: all 0.15s;
   border-left: 2px solid transparent;
   user-select: none;
+  white-space: nowrap;
 }
 
-.nav-item:hover       { color: var(--text); background: var(--bg3); }
-.nav-item.active      { color: var(--accent); background: var(--bg3); border-left-color: var(--accent); }
-.nav-item.danger      { color: var(--danger); }
-.nav-item.danger:hover { color: var(--danger); background: rgba(192, 80, 74, 0.08); }
-.nav-item i           { font-size: 1rem; flex-shrink: 0; }
+.nav-item:hover        { color: var(--text); background: var(--bg3); }
+.nav-item.active       { color: var(--accent); background: var(--bg3); border-left-color: var(--accent); }
+.nav-item.danger       { color: var(--danger); }
+.nav-item.danger:hover { color: var(--danger); background: rgba(248, 113, 113, 0.08); }
+.nav-item i            { font-size: 15px; flex-shrink: 0; }
 
 /* =====================
    Views
@@ -161,8 +168,9 @@ body {
 .view {
   background: var(--bg);
   padding: 1.75rem;
-  overflow-y: auto;
+  overflow-y: auto;    /* main content scrolls, not the page */
   display: none;
+  height: calc(100vh - 52px); /* fill remaining height */
 }
 
 .view.active { display: block; }
