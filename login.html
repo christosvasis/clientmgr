@@ -12,16 +12,16 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg:      #0d1f14;
-      --bg2:     #132019;
-      --bg3:     #1a2e20;
-      --accent:  #4caf7d;
-      --accent2: #2e7d52;
-      --text:    #d4edd9;
-      --text2:   #8aab91;
-      --text3:   #4f7458;
-      --border:  #253d2c;
-      --danger:  #c0504a;
+      --bg:      #0d1321;
+      --bg2:     #111827;
+      --bg3:     #1a2540;
+      --accent:  #38bdf8;
+      --accent2: #0284c7;
+      --text:    #e0f2fe;
+      --text2:   #7da8c4;
+      --text3:   #3d6480;
+      --border:  #1e3a52;
+      --danger:  #f87171;
     }
 
     html, body {
@@ -259,10 +259,6 @@
 
     const app  = initializeApp(firebaseConfig);
     const auth = getAuth(app);
-
-    // Redirect if already logged in
-    onAuthStateChanged(auth, user => {
-      if (user) window.location.href = '/';
     const db   = getFirestore(app);
 
     // If already logged in, check status before redirecting
