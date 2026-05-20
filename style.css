@@ -8,25 +8,25 @@
 }
 
 :root {
-  --bg:          #0d1f14;
-  --bg2:         #132019;
-  --bg3:         #1a2e20;
-  --bg4:         #213b28;
-  --accent:      #4caf7d;
-  --accent2:     #2e7d52;
-  --text:        #d4edd9;
-  --text2:       #8aab91;
-  --text3:       #4f7458;
-  --border:      #253d2c;
-  --danger:      #c0504a;
+  --bg:          #0d1321;
+  --bg2:         #111827;
+  --bg3:         #1a2540;
+  --bg4:         #1e2d4d;
+  --accent:      #38bdf8;
+  --accent2:     #0284c7;
+  --text:        #e0f2fe;
+  --text2:       #7da8c4;
+  --text3:       #3d6480;
+  --border:      #1e3a52;
+  --danger:      #f87171;
   --blue-bg:     #1e2e3d;
-  --blue:        #5b9bd5;
-  --blue-border: #2a4a6a;
+  --blue:        #38bdf8;
+  --blue-border: #0284c7;
 }
 
 html {
   /* Base font size — JS zoom changes this, everything in rem scales with it */
-  font-size: 17px;
+  font-size: 20px;
 }
 
 html, body {
@@ -47,7 +47,7 @@ body {
 .layout {
   display: grid;
   grid-template-columns: 13rem 1fr;
-  grid-template-rows: 3.2rem 1fr;
+  grid-template-rows: 3.2rem auto;
   min-height: 100vh;
 }
 
@@ -112,10 +112,13 @@ body {
   padding: 1rem 0;
   display: flex;
   flex-direction: column;
+  overflow-y: auto;  /* scroll when content overflows on zoom */
 }
 
 .sidebar-top  { flex: 1; }
-.sidebar-bottom { margin-top: auto; }
+
+/* Remove margin-top:auto — sidebar-bottom flows naturally when zoomed */
+.sidebar-bottom { margin-top: 1rem; }
 
 .nav-label {
   font-size: 0.65rem;
@@ -392,9 +395,9 @@ body {
 }
 
 .btn-a                { background: var(--bg3); color: var(--accent); }
-.btn-a:hover          { background: var(--accent2); color: #d4edd9; border-color: var(--accent2); }
-.btn-b                { background: var(--blue-bg); color: var(--blue); border-color: var(--blue-border); }
-.btn-b:hover          { background: var(--blue-border); color: #a8d4f5; border-color: var(--blue); }
+.btn-a:hover          { background: var(--accent2); color: #e0f2fe; border-color: var(--accent2); }
+.btn-b                { background: #1e1a3d; color: #a78bfa; border-color: #3d2e7a; }
+.btn-b:hover          { background: #3d2e7a; color: #ddd6fe; border-color: #a78bfa; }
 
 .notes-btn {
   background: none;

@@ -143,18 +143,18 @@ document.querySelectorAll('.nav-item[data-view]').forEach(item => {
 // =====================
 // Zoom
 // =====================
-const ZOOM_KEY   = 'uiZoom';
-const ZOOM_MIN   = 80;
-const ZOOM_MAX   = 130;
-const ZOOM_STEP  = 5;
-const ZOOM_BASE  = 17; // matches html font-size in style.css
+const ZOOM_KEY  = 'uiZoom';
+const ZOOM_MIN  = 80;
+const ZOOM_MAX  = 130;
+const ZOOM_STEP = 5;
 
 let currentZoom = parseInt(localStorage.getItem(ZOOM_KEY) || '100', 10);
 
 function applyZoom(zoom) {
   currentZoom = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, zoom));
-  // Change html font-size in px — all rem units scale with it, no scrollbar issues
-  document.documentElement.style.fontSize = `${(ZOOM_BASE * currentZoom) / 100}px`;
+  // CSS zoom property — scales everything including layout reflow,
+  // no overlap or scrollbar issues unlike transform or font-size approaches
+  document.documentElement.style.zoom = currentZoom / 100;
   localStorage.setItem(ZOOM_KEY, currentZoom);
   const label = document.getElementById('zoom-label');
   if (label) label.textContent = `${currentZoom}%`;
