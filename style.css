@@ -46,7 +46,7 @@ body {
    ===================== */
 .layout {
   display: grid;
-  grid-template-columns: 200px 1fr;  /* px so sidebar never changes with zoom */
+  grid-template-columns: 220px 1fr;  /* px so sidebar never changes with zoom */
   grid-template-rows: 52px 1fr;      /* px so topbar never changes with zoom */
   height: 100vh;                     /* exact viewport height, not min */
   overflow: hidden;                  /* prevent page-level scroll */
@@ -112,7 +112,7 @@ body {
 .sidebar {
   background: var(--bg2);
   border-right: 1px solid var(--border);
-  width: 200px;           /* fixed px width */
+  width: 220px;           /* fixed px width */
   height: calc(100vh - 52px); /* fixed px height minus topbar */
   display: flex;
   flex-direction: column;
@@ -127,7 +127,7 @@ body {
 .sidebar-bottom { margin-top: auto; }
 
 .nav-label {
-  font-size: 11px;     /* px so sidebar labels don't scale */
+  font-size: 13px;     /* increased to match app text size */
   font-weight: 500;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -146,8 +146,8 @@ body {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 9px 16px;   /* px so nav items don't scale with zoom */
-  font-size: 13px;     /* px so nav items stay same size */
+  padding: 11px 16px;   /* slightly more padding to match bigger text */
+  font-size: 17px;      /* increased to match app text size */
   color: var(--text2);
   cursor: pointer;
   transition: all 0.15s;
@@ -160,7 +160,7 @@ body {
 .nav-item.active       { color: var(--accent); background: var(--bg3); border-left-color: var(--accent); }
 .nav-item.danger       { color: var(--danger); }
 .nav-item.danger:hover { color: var(--danger); background: rgba(248, 113, 113, 0.08); }
-.nav-item i            { font-size: 15px; flex-shrink: 0; }
+.nav-item i            { font-size: 20px; flex-shrink: 0; }
 
 /* =====================
    Views
