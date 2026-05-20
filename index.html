@@ -184,6 +184,29 @@
       <div class="page-title">Admin Panel</div>
       <div class="page-sub">Manage clients and users</div>
 
+      <!-- Pending Requests -->
+      <div class="settings-title">Pending requests</div>
+      <div class="table-wrap" style="margin-bottom:24px">
+        <div class="idle-state" id="pending-loading">
+          <i class="ti ti-loader-2" style="animation:spin 1s linear infinite"></i>
+          Loading...
+        </div>
+        <table class="client-table" id="pending-table" style="display:none">
+          <thead>
+            <tr>
+              <th>Email</th>
+              <th>Requested</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="pending-tbody"></tbody>
+        </table>
+        <div class="idle-state" id="pending-empty" style="display:none">
+          <i class="ti ti-checks"></i>
+          No pending requests
+        </div>
+      </div>
+
       <!-- Add Client -->
       <div class="settings-title">Add client</div>
       <div class="settings-card">
@@ -275,6 +298,7 @@
           <thead>
             <tr>
               <th>Email</th>
+              <th>Status</th>
               <th>Power user</th>
               <th>Admin</th>
               <th></th>

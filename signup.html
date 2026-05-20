@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ClientMgr — Request Access</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:      #0d1f14;
+      --bg2:     #132019;
+      --bg3:     #1a2e20;
+      --accent:  #4caf7d;
+      --accent2: #2e7d52;
+      --text:    #d4edd9;
+      --text2:   #8aab91;
+      --text3:   #4f7458;
+      --border:  #253d2c;
+      --danger:  #c0504a;
+      --warning: #c07a2a;
+    }
+
+    html, body { height: 100%; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Syne', sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(var(--border) 1px, transparent 1px),
+        linear-gradient(90deg, var(--border) 1px, transparent 1px);
+      background-size: 40px 40px;
+      opacity: 0.3;
+      pointer-events: none;
+    }
+
+    .wrap {
+      width: 100%;
+      max-width: 360px;
+      padding: 24px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .logo {
+      font-size: 20px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      color: var(--accent);
+      text-align: center;
+      margin-bottom: 6px;
+    }
+
+    .logo span { color: var(--text3); font-weight: 400; }
+
+    .tagline {
+      font-size: 12px;
+      color: var(--text3);
+      text-align: center;
+      font-family: 'DM Mono', monospace;
+      margin-bottom: 32px;
+    }
+
+    .card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 28px 28px 24px;
+    }
+
+    .card-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+
+    .card-desc {
+      font-size: 11px;
+      color: var(--text3);
+      font-family: 'DM Mono', monospace;
+      margin-bottom: 20px;
+      line-height: 1.6;
+    }
+
+    .field { margin-bottom: 14px; }
+
+    .field label {
+      display: block;
+      font-size: 11px;
+      color: var(--text3);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .field-wrap { position: relative; }
+
+    .field-wrap i {
+      position: absolute;
+      left: 11px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text3);
+      font-size: 15px;
+      pointer-events: none;
+    }
+
+    .field input {
+      width: 100%;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      padding: 10px 12px 10px 36px;
+      font-size: 13px;
+      color: var(--text);
+      font-family: 'Syne', sans-serif;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .field input::placeholder { color: var(--text3); }
+    .field input:focus        { border-color: var(--accent2); }
+
+    .submit-btn {
+      width: 100%;
+      background: var(--accent2);
+      border: none;
+      color: #d4edd9;
+      font-size: 13px;
+      font-weight: 500;
+      padding: 11px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-family: 'Syne', sans-serif;
+      transition: all 0.15s;
+      margin-top: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .submit-btn:hover  { background: var(--accent); color: var(--bg); }
+    .submit-btn:active { transform: scale(0.98); }
+
+    .error-msg {
+      font-size: 12px;
+      color: var(--danger);
+      font-family: 'DM Mono', monospace;
+      margin-top: 12px;
+      min-height: 18px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .error-msg.visible { opacity: 1; }
+
+    /* Pending state */
+    .pending-state {
+      display: none;
+      text-align: center;
+      padding: 8px 0;
+    }
+
+    .pending-icon {
+      font-size: 36px;
+      color: var(--accent2);
+      margin-bottom: 12px;
+    }
+
+    .pending-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+
+    .pending-desc {
+      font-size: 12px;
+      color: var(--text3);
+      font-family: 'DM Mono', monospace;
+      line-height: 1.7;
+    }
+
+    .footer {
+      text-align: center;
+      font-size: 11px;
+      color: var(--text3);
+      font-family: 'DM Mono', monospace;
+      margin-top: 20px;
+    }
+
+    .footer a {
+      color: var(--accent2);
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+
+    .footer a:hover { color: var(--accent); }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+  <div class="wrap">
+    <div class="logo">CLIENT<span>mgr</span></div>
+    <div class="tagline">internal tool</div>
+
+    <div class="card">
+      <div id="form-state">
+        <div class="card-title">Request access</div>
+        <div class="card-desc">
+          Only @mymail.mail addresses are allowed.<br/>
+          Your account will be reviewed before activation.
+        </div>
+
+        <div class="field">
+          <label for="email">Email</label>
+          <div class="field-wrap">
+            <i class="ti ti-mail"></i>
+            <input type="email" id="email" placeholder="you@mymail.mail" autocomplete="email" />
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="password">Password</label>
+          <div class="field-wrap">
+            <i class="ti ti-lock"></i>
+            <input type="password" id="password" placeholder="Min. 6 characters" autocomplete="new-password" />
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="password-confirm">Confirm password</label>
+          <div class="field-wrap">
+            <i class="ti ti-lock-check"></i>
+            <input type="password" id="password-confirm" placeholder="Repeat password" autocomplete="new-password" />
+          </div>
+        </div>
+
+        <button class="submit-btn" id="submit-btn">
+          <i class="ti ti-send"></i> Request access
+        </button>
+
+        <div class="error-msg" id="error-msg">
+          <i class="ti ti-alert-circle"></i>
+          <span id="error-text"></span>
+        </div>
+      </div>
+
+      <!-- Shown after successful signup -->
+      <div class="pending-state" id="pending-state">
+        <div class="pending-icon">
+          <i class="ti ti-clock-check"></i>
+        </div>
+        <div class="pending-title">Request submitted</div>
+        <div class="pending-desc">
+          Your account is pending approval.<br/>
+          An admin will review your request.<br/>
+          You'll be able to log in once approved.
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      Already have an account? <a href="login.html">Sign in</a>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp }
+      from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword, signOut }
+      from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
+    import { getFirestore, doc, setDoc }
+      from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
+
+    const ALLOWED_DOMAIN = '@mymail.mail';
+
+    const firebaseConfig = {
+      apiKey:            "AIzaSyBJii3XONCMHHDpm9TrqYwHKZ4rJSEb_CI",
+      authDomain:        "clientmgr-b66ae.firebaseapp.com",
+      projectId:         "clientmgr-b66ae",
+      storageBucket:     "clientmgr-b66ae.firebasestorage.app",
+      messagingSenderId: "416134439201",
+      appId:             "1:416134439201:web:a2482a79088e9ee0d5de60"
+    };
+
+    const firebaseApp = initializeApp(firebaseConfig);
+    const auth        = getAuth(firebaseApp);
+    const db          = getFirestore(firebaseApp);
+
+    const emailInput    = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+    const confirmInput  = document.getElementById('password-confirm');
+    const submitBtn     = document.getElementById('submit-btn');
+    const errorMsg      = document.getElementById('error-msg');
+    const errorText     = document.getElementById('error-text');
+    const formState     = document.getElementById('form-state');
+    const pendingState  = document.getElementById('pending-state');
+
+    function showError(msg) {
+      errorText.textContent = msg;
+      errorMsg.classList.add('visible');
+      setTimeout(() => errorMsg.classList.remove('visible'), 4000);
+    }
+
+    function setLoading(loading) {
+      submitBtn.disabled  = loading;
+      submitBtn.innerHTML = loading
+        ? '<i class="ti ti-loader-2" style="animation:spin 1s linear infinite"></i> Submitting...'
+        : '<i class="ti ti-send"></i> Request access';
+    }
+
+    async function attemptSignup() {
+      const email    = emailInput.value.trim();
+      const password = passwordInput.value;
+      const confirm  = confirmInput.value;
+
+      // Validate
+      if (!email || !password || !confirm) {
+        showError('Please fill in all fields.');
+        return;
+      }
+
+      if (!email.endsWith(ALLOWED_DOMAIN)) {
+        showError(`Only ${ALLOWED_DOMAIN} email addresses are allowed.`);
+        return;
+      }
+
+      if (password.length < 6) {
+        showError('Password must be at least 6 characters.');
+        return;
+      }
+
+      if (password !== confirm) {
+        showError('Passwords do not match.');
+        return;
+      }
+
+      setLoading(true);
+
+      try {
+        // Create Firebase Auth account
+        const cred = await createUserWithEmailAndPassword(auth, email, password);
+
+        // Save to Firestore with pending status
+        await setDoc(doc(db, 'users', cred.user.uid), {
+          email,
+          isAdmin:     false,
+          isPowerUser: false,
+          status:      'pending',
+          createdAt:   new Date().toISOString()
+        });
+
+        // Sign them out immediately — they can't access dashboard until approved
+        await signOut(auth);
+
+        // Show pending message
+        formState.style.display    = 'none';
+        pendingState.style.display = 'block';
+
+      } catch (e) {
+        setLoading(false);
+        switch (e.code) {
+          case 'auth/email-already-in-use':
+            showError('An account with this email already exists.');
+            break;
+          case 'auth/invalid-email':
+            showError('Please enter a valid email address.');
+            break;
+          case 'auth/weak-password':
+            showError('Password must be at least 6 characters.');
+            break;
+          default:
+            showError('Something went wrong. Please try again.');
+        }
+      }
+    }
+
+    submitBtn.addEventListener('click', attemptSignup);
+
+    [emailInput, passwordInput, confirmInput].forEach(input => {
+      input.addEventListener('keydown', e => {
+        if (e.key === 'Enter') attemptSignup();
+      });
+    });
+
+    emailInput.focus();
+  </script>
+
+</body>
+</html>

@@ -134,6 +134,7 @@ document.querySelectorAll('.nav-item[data-view]').forEach(item => {
     if (view === 'admin') {
       renderAdminClients();
       renderAdminUsers();
+      renderPendingRequests();
     }
   });
 });
@@ -142,27 +143,24 @@ document.querySelectorAll('.nav-item[data-view]').forEach(item => {
 // =====================
 // Zoom
 // =====================
-const ZOOM_KEY  = 'uiZoom';
-const ZOOM_MIN  = 80;
-const ZOOM_MAX  = 130;
-const ZOOM_STEP = 5;
+const ZOOM_KEY   = 'uiZoom';
+const ZOOM_MIN   = 80;
+const ZOOM_MAX   = 130;
+const ZOOM_STEP  = 5;
+const ZOOM_BASE  = 17; // matches html font-size in style.css
 
 let currentZoom = parseInt(localStorage.getItem(ZOOM_KEY) || '100', 10);
 
 function applyZoom(zoom) {
   currentZoom = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, zoom));
-  // Scale the entire page using transform on body
-  const scale = currentZoom / 100;
-  document.body.style.transform       = `scale(${scale})`;
-  document.body.style.transformOrigin = 'top left';
-  document.body.style.width           = `${100 / scale}%`;
-  document.body.style.height          = `${100 / scale}vh`;
+  // Change html font-size in px — all rem units scale with it, no scrollbar issues
+  document.documentElement.style.fontSize = `${(ZOOM_BASE * currentZoom) / 100}px`;
   localStorage.setItem(ZOOM_KEY, currentZoom);
   const label = document.getElementById('zoom-label');
   if (label) label.textContent = `${currentZoom}%`;
 }
 
-// Apply on load immediately
+// Apply immediately on load
 applyZoom(currentZoom);
 
 // Wire up buttons after DOM is ready
@@ -380,6 +378,85 @@ function render(query) {
 
 
 // =====================
+// Pending Requests
+// =====================
+async function renderPendingRequests() {
+  if (!isAdmin) return;
+
+  const pendingTable   = document.getElementById('pending-table');
+  const pendingTbody   = document.getElementById('pending-tbody');
+  const pendingLoading = document.getElementById('pending-loading');
+  const pendingEmpty   = document.getElementById('pending-empty');
+
+  pendingLoading.style.display = 'block';
+  pendingTable.style.display   = 'none';
+  pendingEmpty.style.display   = 'none';
+
+  try {
+    const snap    = await getDocs(collection(db, 'users'));
+    const pending = snap.docs
+      .map(d => ({ uid: d.id, ...d.data() }))
+      .filter(u => u.status === 'pending')
+      .sort((a, b) => (a.createdAt || '').localeCompare(b.createdAt || ''));
+
+    pendingLoading.style.display = 'none';
+
+    if (!pending.length) {
+      pendingEmpty.style.display = 'block';
+      return;
+    }
+
+    pendingTbody.innerHTML = pending.map(u => `
+      <tr>
+        <td class="client-name-text">${u.email}</td>
+        <td style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--text3)">
+          ${u.createdAt ? new Date(u.createdAt).toLocaleDateString('en-GB') : '—'}
+        </td>
+        <td style="display:flex;gap:6px">
+          <button class="save-btn approve-btn"
+                  data-uid="${u.uid}" data-email="${u.email}"
+                  style="padding:4px 10px;font-size:0.7rem;background:var(--accent2)">
+            <i class="ti ti-check" style="font-size:0.7rem"></i> Approve
+          </button>
+          <button class="notes-btn reject-btn"
+                  data-uid="${u.uid}" data-email="${u.email}"
+                  style="color:var(--danger);border-color:var(--danger);padding:4px 10px;font-size:0.7rem">
+            Reject
+          </button>
+        </td>
+      </tr>
+    `).join('');
+
+    pendingTbody.querySelectorAll('.approve-btn').forEach(btn => {
+      btn.addEventListener('click', () => resolveRequest(btn.dataset.uid, btn.dataset.email, 'approved'));
+    });
+
+    pendingTbody.querySelectorAll('.reject-btn').forEach(btn => {
+      btn.addEventListener('click', () => resolveRequest(btn.dataset.uid, btn.dataset.email, 'rejected'));
+    });
+
+    pendingTable.style.display = '';
+
+  } catch (e) {
+    pendingLoading.innerHTML = `<span style="color:var(--danger)">Failed to load requests.</span>`;
+  }
+}
+
+async function resolveRequest(uid, email, status) {
+  const action = status === 'approved' ? 'approve' : 'reject';
+  if (!confirm(`${action.charAt(0).toUpperCase() + action.slice(1)} access for "${email}"?`)) return;
+
+  try {
+    await updateDoc(doc(db, 'users', uid), { status });
+    renderPendingRequests();
+    renderAdminUsers();
+  } catch (e) {
+    alert(`Failed to ${action} request.`);
+  }
+}
+
+
+// =====================
 // Admin Panel
 // =====================
 async function renderAdminClients() {
@@ -561,9 +638,18 @@ async function renderAdminUsers() {
 
     const users = data.users.sort((a, b) => a.email.localeCompare(b.email));
 
-    userTbody.innerHTML = users.map(u => `
+    userTbody.innerHTML = users.map(u => {
+      const status = u.status || 'approved';
+      const statusBadge = status === 'pending'
+        ? `<span style="font-size:0.65rem;background:#2d2316;color:#c0894a;border:1px solid #5a3e1a;padding:2px 7px;border-radius:4px;font-family:'DM Mono',monospace">pending</span>`
+        : status === 'rejected'
+        ? `<span style="font-size:0.65rem;background:#2d1616;color:var(--danger);border:1px solid #5a1a1a;padding:2px 7px;border-radius:4px;font-family:'DM Mono',monospace">rejected</span>`
+        : `<span style="font-size:0.65rem;background:#1a3d28;color:#5fbb87;border:1px solid #2e6644;padding:2px 7px;border-radius:4px;font-family:'DM Mono',monospace">approved</span>`;
+
+      return `
       <tr>
         <td class="client-name-text">${u.email}</td>
+        <td>${statusBadge}</td>
         <td>
           <input type="checkbox"
                  class="role-checkbox"
@@ -589,7 +675,7 @@ async function renderAdminUsers() {
           </button>
         </td>
       </tr>
-    `).join('');
+    `}).join('');
 
     // Role toggle
     userTbody.querySelectorAll('.role-checkbox').forEach(cb => {
