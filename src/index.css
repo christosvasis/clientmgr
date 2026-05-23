@@ -1,33 +1,78 @@
 @import "tailwindcss";
 
 :root[data-theme="dark"] {
-  --bg:        #0d1321;
-  --bg2:       #111827;
-  --bg3:       #1a2540;
-  --bg4:       #1e2d4d;
-  --accent:    #38bdf8;
-  --accent2:   #0284c7;
-  --text:      #e0f2fe;
-  --text2:     #7da8c4;
-  --text3:     #3d6480;
-  --border:    #1e3a52;
-  --danger:    #f87171;
-  --btn-bg:    #1a2540;
+  --bg: #0d1321;
+  --bg2: #111827;
+  --bg3: #1a2540;
+  --bg4: #1e2d4d;
+  --accent: #38bdf8;
+  --accent2: #0284c7;
+  --text: #e0f2fe;
+  --text2: #7da8c4;
+  --text3: #3d6480;
+  --border: #1e3a52;
+  --danger: #f87171;
+  --btn-bg: #1a2540;
   --btn-hover: #1e2d4d;
 }
 
 :root[data-theme="light"] {
-  --bg:        #f0f4f8;
-  --bg2:       #ffffff;
-  --bg3:       #e2eaf2;
-  --bg4:       #d0dcea;
-  --accent:    #0284c7;
-  --accent2:   #0369a1;
-  --text:      #0f172a;
-  --text2:     #334155;
-  --text3:     #64748b;
-  --border:    #cbd5e1;
-  --danger:    #ef4444;
-  --btn-bg:    #e2eaf2;
+  --bg: #f0f4f8;
+  --bg2: #ffffff;
+  --bg3: #e2eaf2;
+  --bg4: #d0dcea;
+  --accent: #0284c7;
+  --accent2: #0369a1;
+  --text: #0f172a;
+  --text2: #334155;
+  --text3: #64748b;
+  --border: #cbd5e1;
+  --danger: #ef4444;
+  --btn-bg: #e2eaf2;
   --btn-hover: #cbd5e1;
 }
+
+/* ----- Buttons ----- */
+.cm-btn-primary { background: var(--accent2); color: #fff; }
+.cm-btn-primary:hover { background: var(--accent); }
+
+.cm-btn-save { background: var(--accent2); color: #fff; }
+.cm-btn-save:hover { background: var(--accent); color: var(--bg); }
+
+.cm-btn-launch { background: var(--btn-bg); color: var(--accent); border: 1px solid var(--border); }
+.cm-btn-launch:hover { background: var(--accent2); color: #fff; border-color: var(--accent2); }
+
+/* ----- Text-color hovers ----- */
+.cm-hover-text { color: var(--text3); }
+.cm-hover-text:hover { color: var(--text); }
+
+.cm-hover-text2 { color: var(--text3); }
+.cm-hover-text2:hover { color: var(--text2); }
+
+.cm-hover-accent { color: var(--text3); }
+.cm-hover-accent:hover { color: var(--accent); }
+
+/* ----- Links ----- */
+.cm-link { color: var(--text2); }
+.cm-link:hover { color: var(--accent); }
+
+.cm-link-fade { color: var(--text3); opacity: 0.6; transition: opacity 0.15s; }
+.cm-link-fade:hover { opacity: 1; }
+
+/* ----- Table rows ----- */
+.cm-row:hover { background: var(--bg3); }
+
+/* ----- Recently-used chip ----- */
+.cm-chip { background: var(--bg2); border: 1px solid var(--border); color: var(--text2); }
+.cm-chip:hover { border-color: var(--accent2); color: var(--text); }
+
+/* ----- Note card ----- */
+.cm-card { background: var(--bg2); border: 1px solid var(--border); }
+.cm-card:hover { border-color: var(--accent2); background: var(--bg3); }
+
+/* ----- Inputs ----- */
+.cm-input { background: var(--bg3); border: 1px solid var(--border); color: var(--text); }
+.cm-input:focus { border-color: var(--accent2); }
+
+.cm-search { background: var(--bg2); border: 1px solid var(--border); color: var(--text); }
+.cm-search:focus { border-color: var(--accent2); }

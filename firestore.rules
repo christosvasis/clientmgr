@@ -1,0 +1,69 @@
+rules_version = '2';
+
+// Server-side authorization for ClientMgr.
+//
+// These rules are the real security boundary — the client-side `canEdit`
+// (isAdmin || isPowerUser) checks are UX only and can be bypassed by anyone
+// talking to Firestore directly. Apply via the Firebase console
+// (Firestore → Rules) or `firebase deploy --only firestore:rules`.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function profile() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function hasProfile() {
+      return isSignedIn()
+        && exists(/databases/$(database)/documents/users/$(request.auth.uid));
+    }
+
+    // NOTE: requires an explicit status == 'approved'. The client treats a
+    // missing status field as approved for legacy docs; rules fail closed
+    // instead. Backfill legacy users with status: 'approved' if needed.
+    function isApproved() {
+      return hasProfile() && profile().status == 'approved';
+    }
+
+    function isAdmin() {
+      return isApproved() && profile().isAdmin == true;
+    }
+
+    function isPowerUser() {
+      return isApproved() && profile().isPowerUser == true;
+    }
+
+    // ---- users ----
+    match /users/{uid} {
+      // Own doc is readable by the user; admins can read everyone (UserManager).
+      allow read: if isSignedIn() && (request.auth.uid == uid || isAdmin());
+
+      // Self-signup: a user may create only their OWN doc, and only as a
+      // non-privileged, pending account. Prevents privilege escalation.
+      allow create: if isSignedIn()
+        && request.auth.uid == uid
+        && request.resource.data.status == 'pending'
+        && request.resource.data.isAdmin == false
+        && request.resource.data.isPowerUser == false;
+
+      // Admins approve/reject and toggle roles from the client (PendingRequests).
+      allow update: if isAdmin();
+
+      // User creation/deletion with privileges runs through the Admin SDK API,
+      // which bypasses these rules. Block direct client deletes.
+      allow delete: if false;
+    }
+
+    // ---- clients ----
+    match /clients/{id} {
+      allow read: if isApproved();
+      allow create, delete: if isAdmin();
+      allow update: if isAdmin() || isPowerUser();
+    }
+  }
+}

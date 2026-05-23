@@ -1,27 +1,12 @@
 import { useState } from 'react'
-import { useAuth }  from '../context/AuthContext'
-
-function applyZoom(z) {
-  const root = document.getElementById('zoom-root')
-  if (!root) return
-  if (z === 100) {
-    root.style.transform = ''
-    root.style.width     = ''
-    root.style.height    = ''
-    return
-  }
-  const scale = z / 100
-  root.style.transform       = `scale(${scale})`
-  root.style.transformOrigin = 'top left'
-  root.style.width           = `${100 / scale}%`
-  root.style.height          = `${100 / scale}vh`
-}
+import { useAuth } from '../context/AuthContext'
+import { applyZoom } from '../utils/zoom'
 
 export default function Settings() {
   const { user, profile } = useAuth()
   const [basePath, setBasePath] = useState(() => localStorage.getItem('basePath') || '/project/')
-  const [zoom,     setZoom]     = useState(() => parseInt(localStorage.getItem('uiZoom') || '100', 10))
-  const [saved,    setSaved]    = useState(false)
+  const [zoom, setZoom] = useState(() => parseInt(localStorage.getItem('uiZoom') || '100', 10))
+  const [saved, setSaved] = useState(false)
 
   function changeZoom(val) {
     const z = Math.min(130, Math.max(80, val))
@@ -32,15 +17,13 @@ export default function Settings() {
 
   function saveSettings() {
     localStorage.setItem('basePath', basePath)
-    localStorage.setItem('uiZoom',   zoom)
+    localStorage.setItem('uiZoom', zoom)
     applyZoom(zoom)
     setSaved(true)
     setTimeout(() => setSaved(false), 2000)
   }
 
   const roleLabel = profile?.isAdmin ? 'Admin' : profile?.isPowerUser ? 'Power user' : 'User'
-
-  const inputStyle = { background: 'var(--bg3)', border: '1px solid var(--border)', color: 'var(--text)' }
 
   return (
     <div className="p-6 overflow-y-auto h-full" style={{ background: 'var(--bg)' }}>
@@ -53,8 +36,10 @@ export default function Settings() {
         <div className="text-xs uppercase tracking-wider mb-2" style={{ color: 'var(--text3)' }}>Account</div>
         <div className="rounded-lg p-4 mb-6" style={{ background: 'var(--bg2)', border: '1px solid var(--border)' }}>
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-semibold text-white flex-shrink-0"
-              style={{ background: 'var(--accent2)' }}>
+            <div
+              className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-semibold text-white flex-shrink-0"
+              style={{ background: 'var(--accent2)' }}
+            >
               {user?.email?.slice(0, 2).toUpperCase()}
             </div>
             <div className="min-w-0">
@@ -69,21 +54,22 @@ export default function Settings() {
         <div className="rounded-lg p-4 mb-6" style={{ background: 'var(--bg2)', border: '1px solid var(--border)' }}>
           <div className="text-xs mb-3" style={{ color: 'var(--text3)' }}>Interface zoom</div>
           <div className="flex items-center gap-3">
-            <button onClick={() => changeZoom(zoom - 5)}
+            <button
+              onClick={() => changeZoom(zoom - 5)}
               className="w-8 h-8 rounded text-sm font-mono transition-colors"
-              style={{ background: 'var(--btn-bg)', border: '1px solid var(--border)', color: 'var(--text2)' }}>
+              style={{ background: 'var(--btn-bg)', border: '1px solid var(--border)', color: 'var(--text2)' }}
+            >
               -
             </button>
             <span className="text-sm font-mono w-12 text-center" style={{ color: 'var(--text)' }}>{zoom}%</span>
-            <button onClick={() => changeZoom(zoom + 5)}
+            <button
+              onClick={() => changeZoom(zoom + 5)}
               className="w-8 h-8 rounded text-sm font-mono transition-colors"
-              style={{ background: 'var(--btn-bg)', border: '1px solid var(--border)', color: 'var(--text2)' }}>
+              style={{ background: 'var(--btn-bg)', border: '1px solid var(--border)', color: 'var(--text2)' }}
+            >
               +
             </button>
-            <button onClick={() => changeZoom(100)} className="text-xs transition-colors ml-1 font-mono"
-              style={{ color: 'var(--text3)' }}
-              onMouseOver={e => e.target.style.color = 'var(--text2)'}
-              onMouseOut={e  => e.target.style.color = 'var(--text3)'}>
+            <button onClick={() => changeZoom(100)} className="cm-hover-text2 text-xs transition-colors ml-1 font-mono">
               Reset
             </button>
           </div>
@@ -96,11 +82,11 @@ export default function Settings() {
         <div className="text-xs uppercase tracking-wider mb-2" style={{ color: 'var(--text3)' }}>Paths</div>
         <div className="rounded-lg p-4 mb-6" style={{ background: 'var(--bg2)', border: '1px solid var(--border)' }}>
           <div className="text-xs mb-1.5" style={{ color: 'var(--text3)' }}>Base path</div>
-          <input value={basePath} onChange={e => setBasePath(e.target.value)} placeholder="/project/"
-            className="w-full rounded px-3 py-2 text-sm font-mono outline-none transition-colors"
-            style={inputStyle}
-            onFocus={e => e.target.style.borderColor = 'var(--accent2)'}
-            onBlur={e  => e.target.style.borderColor = 'var(--border)'} />
+          <input
+            value={basePath} onChange={e => setBasePath(e.target.value)}
+            placeholder="/project/"
+            className="cm-input w-full rounded px-3 py-2 text-sm font-mono outline-none transition-colors"
+          />
           <div className="text-xs font-mono mt-2" style={{ color: 'var(--text3)' }}>
             Clients launch from this folder — e.g. /project/client_a/app.exe
           </div>
@@ -108,11 +94,7 @@ export default function Settings() {
 
         {/* Save */}
         <div className="flex items-center gap-3">
-          <button onClick={saveSettings}
-            className="text-sm font-medium px-5 py-2 rounded transition-colors text-white"
-            style={{ background: 'var(--accent2)' }}
-            onMouseOver={e => { e.currentTarget.style.background = 'var(--accent)'; e.currentTarget.style.color = 'var(--bg)' }}
-            onMouseOut={e  => { e.currentTarget.style.background = 'var(--accent2)'; e.currentTarget.style.color = '#ffffff' }}>
+          <button onClick={saveSettings} className="cm-btn-save text-sm font-medium px-5 py-2 rounded transition-colors">
             Save changes
           </button>
           {saved && <span className="text-xs font-mono" style={{ color: '#5fbb87' }}>Saved</span>}

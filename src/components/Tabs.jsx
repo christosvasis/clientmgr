@@ -11,7 +11,7 @@ export default function Tabs({ tabs, active, onChange, noMargin }) {
           className="px-4 py-1.5 text-sm rounded-md transition-colors font-medium"
           style={{
             background: active === tab.value ? 'var(--accent2)' : 'transparent',
-            color:      active === tab.value ? '#ffffff'        : 'var(--text2)',
+            color: active === tab.value ? '#ffffff' : 'var(--text2)',
           }}
         >
           {tab.label}
@@ -20,7 +20,7 @@ export default function Tabs({ tabs, active, onChange, noMargin }) {
               className="ml-2 text-xs px-1.5 py-0.5 rounded-full"
               style={{
                 background: active === tab.value ? 'rgba(255,255,255,0.2)' : 'var(--bg3)',
-                color:      active === tab.value ? '#ffffff'               : 'var(--accent)',
+                color: active === tab.value ? '#ffffff' : 'var(--accent)',
               }}
             >
               {tab.count}
