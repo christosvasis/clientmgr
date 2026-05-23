@@ -2,12 +2,7 @@ import { useState, useEffect }    from 'react'
 import { collection, onSnapshot } from 'firebase/firestore'
 import { db }                      from '../../firebase/config'
 import { useAuth }                 from '../../context/AuthContext'
-
-const STATUS_STYLE = {
-  approved: { background: '#1a3d28', color: '#5fbb87', border: '1px solid #2e6644' },
-  pending:  { background: '#2d2316', color: '#c0894a', border: '1px solid #5a3e1a' },
-  rejected: { background: '#2d1616', color: '#f87171', border: '1px solid #5a1a1a' },
-}
+import StatusBadge from '../StatusBadge'
 
 export default function UserManager() {
   const { user: currentUser } = useAuth()
@@ -147,10 +142,7 @@ export default function UserManager() {
                     {u.email || <span className="italic text-xs" style={{ color: 'var(--text3)' }}>no email</span>}
                   </td>
                   <td className="px-4 py-3">
-                    <span className="text-xs font-mono px-2 py-0.5 rounded"
-                      style={STATUS_STYLE[u.status] || STATUS_STYLE.approved}>
-                      {u.status || 'approved'}
-                    </span>
+                    <StatusBadge status={u.status || 'approved'} />
                   </td>
                   <td className="px-4 py-3">
                     <input type="checkbox" checked={u.isPowerUser || false}
