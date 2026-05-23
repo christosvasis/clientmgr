@@ -1,12 +1,12 @@
 import { createContext, useContext, useEffect, useState } from 'react'
-import { onAuthStateChanged }                            from 'firebase/auth'
-import { doc, getDoc }                                   from 'firebase/firestore'
-import { auth, db }                                      from '../firebase/config'
+import { onAuthStateChanged } from 'firebase/auth'
+import { doc, getDoc } from 'firebase/firestore'
+import { auth, db } from '../firebase/config'
 
 const AuthContext = createContext(null)
 
 export function AuthProvider({ children }) {
-  const [user,    setUser]    = useState(undefined)
+  const [user, setUser] = useState(undefined)
   const [profile, setProfile] = useState(null)
 
   useEffect(() => {
@@ -27,9 +27,9 @@ export function AuthProvider({ children }) {
     return unsub
   }, [])
 
-  const isAdmin     = profile?.isAdmin     === true
+  const isAdmin = profile?.isAdmin === true
   const isPowerUser = profile?.isPowerUser === true
-  const isApproved  = profile?.status === 'approved' || profile?.status === undefined
+  const isApproved = profile?.status === 'approved' || profile?.status === undefined
 
   return (
     <AuthContext.Provider value={{ user, profile, isAdmin, isPowerUser, isApproved }}>

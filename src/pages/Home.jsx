@@ -1,9 +1,11 @@
 import { useState, useEffect, useRef } from 'react'
-import { collection, query,
-         orderBy, onSnapshot }         from 'firebase/firestore'
-import { db }                          from '../firebase/config'
-import StatusBadge                     from '../components/StatusBadge'
-import ClientPanel                     from '../components/ClientPanel'
+import {
+  collection, query,
+  orderBy, onSnapshot
+} from 'firebase/firestore'
+import { db } from '../firebase/config'
+import StatusBadge from '../components/StatusBadge'
+import ClientPanel from '../components/ClientPanel'
 
 function highlight(text, q) {
   if (!q) return text
@@ -21,16 +23,16 @@ function highlight(text, q) {
 }
 
 export default function Home() {
-  const [clients,        setClients]        = useState([])
-  const [search,         setSearch]         = useState('')
+  const [clients, setClients] = useState([])
+  const [search, setSearch] = useState('')
   const [selectedClient, setSelectedClient] = useState(null)
-  const [recentlyUsed,   setRecentlyUsed]   = useState(
+  const [recentlyUsed, setRecentlyUsed] = useState(
     () => JSON.parse(localStorage.getItem('recentlyUsed') || '[]')
   )
   const searchRef = useRef(null)
 
   useEffect(() => {
-    const q     = query(collection(db, 'clients'), orderBy('name'))
+    const q = query(collection(db, 'clients'), orderBy('name'))
     const unsub = onSnapshot(q, snap => {
       setClients(snap.docs.map(d => ({ id: d.id, ...d.data() })))
     })
@@ -95,7 +97,7 @@ export default function Home() {
                   className="flex items-center gap-2 text-xs rounded-full px-3 py-1 transition-colors"
                   style={{ background: 'var(--bg2)', border: '1px solid var(--border)', color: 'var(--text2)' }}
                   onMouseOver={e => { e.currentTarget.style.borderColor = 'var(--accent2)'; e.currentTarget.style.color = 'var(--text)' }}
-                  onMouseOut={e  => { e.currentTarget.style.borderColor = 'var(--border)';  e.currentTarget.style.color = 'var(--text2)' }}
+                  onMouseOut={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.color = 'var(--text2)' }}
                 >
                   <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: 'var(--accent)' }} />
                   {name}
@@ -116,7 +118,7 @@ export default function Home() {
             className="w-full rounded-lg px-4 py-2 text-sm outline-none transition-colors"
             style={{ background: 'var(--bg2)', border: '1px solid var(--border)', color: 'var(--text)' }}
             onFocus={e => e.target.style.borderColor = 'var(--accent2)'}
-            onBlur={e  => e.target.style.borderColor = 'var(--border)'}
+            onBlur={e => e.target.style.borderColor = 'var(--border)'}
           />
           {search && (
             <button
@@ -124,7 +126,7 @@ export default function Home() {
               className="absolute right-3 top-1/2 -translate-y-1/2 transition-colors text-sm font-mono"
               style={{ color: 'var(--text3)' }}
               onMouseOver={e => e.target.style.color = 'var(--text)'}
-              onMouseOut={e  => e.target.style.color = 'var(--text3)'}
+              onMouseOut={e => e.target.style.color = 'var(--text3)'}
             >
               x
             </button>
@@ -174,7 +176,7 @@ export default function Home() {
                     className="cursor-pointer transition-colors last:border-0"
                     style={{ borderBottom: '1px solid var(--border)' }}
                     onMouseOver={e => e.currentTarget.style.background = 'var(--bg3)'}
-                    onMouseOut={e  => e.currentTarget.style.background = 'transparent'}
+                    onMouseOut={e => e.currentTarget.style.background = 'transparent'}
                   >
                     <td className="px-4 py-2.5 text-sm font-medium" style={{ color: 'var(--text)' }}>
                       {highlight(client.name, search)}
@@ -194,7 +196,7 @@ export default function Home() {
                         className="text-xs transition-colors font-mono"
                         style={{ color: 'var(--text3)' }}
                         onMouseOver={e => e.target.style.color = 'var(--accent)'}
-                        onMouseOut={e  => e.target.style.color = 'var(--text3)'}
+                        onMouseOut={e => e.target.style.color = 'var(--text3)'}
                         title="Copy path"
                       >
                         copy

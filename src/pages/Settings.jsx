@@ -1,27 +1,27 @@
 import { useState } from 'react'
-import { useAuth }  from '../context/AuthContext'
+import { useAuth } from '../context/AuthContext'
 
 function applyZoom(z) {
   const root = document.getElementById('zoom-root')
   if (!root) return
   if (z === 100) {
     root.style.transform = ''
-    root.style.width     = ''
-    root.style.height    = ''
+    root.style.width = ''
+    root.style.height = ''
     return
   }
   const scale = z / 100
-  root.style.transform       = `scale(${scale})`
+  root.style.transform = `scale(${scale})`
   root.style.transformOrigin = 'top left'
-  root.style.width           = `${100 / scale}%`
-  root.style.height          = `${100 / scale}vh`
+  root.style.width = `${100 / scale}%`
+  root.style.height = `${100 / scale}vh`
 }
 
 export default function Settings() {
   const { user, profile } = useAuth()
   const [basePath, setBasePath] = useState(() => localStorage.getItem('basePath') || '/project/')
-  const [zoom,     setZoom]     = useState(() => parseInt(localStorage.getItem('uiZoom') || '100', 10))
-  const [saved,    setSaved]    = useState(false)
+  const [zoom, setZoom] = useState(() => parseInt(localStorage.getItem('uiZoom') || '100', 10))
+  const [saved, setSaved] = useState(false)
 
   function changeZoom(val) {
     const z = Math.min(130, Math.max(80, val))
@@ -32,7 +32,7 @@ export default function Settings() {
 
   function saveSettings() {
     localStorage.setItem('basePath', basePath)
-    localStorage.setItem('uiZoom',   zoom)
+    localStorage.setItem('uiZoom', zoom)
     applyZoom(zoom)
     setSaved(true)
     setTimeout(() => setSaved(false), 2000)
@@ -83,7 +83,7 @@ export default function Settings() {
             <button onClick={() => changeZoom(100)} className="text-xs transition-colors ml-1 font-mono"
               style={{ color: 'var(--text3)' }}
               onMouseOver={e => e.target.style.color = 'var(--text2)'}
-              onMouseOut={e  => e.target.style.color = 'var(--text3)'}>
+              onMouseOut={e => e.target.style.color = 'var(--text3)'}>
               Reset
             </button>
           </div>
@@ -100,7 +100,7 @@ export default function Settings() {
             className="w-full rounded px-3 py-2 text-sm font-mono outline-none transition-colors"
             style={inputStyle}
             onFocus={e => e.target.style.borderColor = 'var(--accent2)'}
-            onBlur={e  => e.target.style.borderColor = 'var(--border)'} />
+            onBlur={e => e.target.style.borderColor = 'var(--border)'} />
           <div className="text-xs font-mono mt-2" style={{ color: 'var(--text3)' }}>
             Clients launch from this folder — e.g. /project/client_a/app.exe
           </div>
@@ -112,7 +112,7 @@ export default function Settings() {
             className="text-sm font-medium px-5 py-2 rounded transition-colors text-white"
             style={{ background: 'var(--accent2)' }}
             onMouseOver={e => { e.currentTarget.style.background = 'var(--accent)'; e.currentTarget.style.color = 'var(--bg)' }}
-            onMouseOut={e  => { e.currentTarget.style.background = 'var(--accent2)'; e.currentTarget.style.color = '#ffffff' }}>
+            onMouseOut={e => { e.currentTarget.style.background = 'var(--accent2)'; e.currentTarget.style.color = '#ffffff' }}>
             Save changes
           </button>
           {saved && <span className="text-xs font-mono" style={{ color: '#5fbb87' }}>Saved</span>}

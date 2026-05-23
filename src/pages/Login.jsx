@@ -1,14 +1,14 @@
-import { useState }                            from 'react'
-import { Link, useNavigate }                   from 'react-router-dom'
+import { useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import { signInWithEmailAndPassword, signOut } from 'firebase/auth'
-import { doc, getDoc }                         from 'firebase/firestore'
-import { auth, db }                            from '../firebase/config'
+import { doc, getDoc } from 'firebase/firestore'
+import { auth, db } from '../firebase/config'
 
 export default function Login() {
-  const [email,    setEmail]    = useState('')
+  const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [error,    setError]    = useState('')
-  const [loading,  setLoading]  = useState(false)
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
 
   async function handleLogin(e) {
@@ -17,8 +17,8 @@ export default function Login() {
     setLoading(true)
     setError('')
     try {
-      const cred   = await signInWithEmailAndPassword(auth, email, password)
-      const snap   = await getDoc(doc(db, 'users', cred.user.uid))
+      const cred = await signInWithEmailAndPassword(auth, email, password)
+      const snap = await getDoc(doc(db, 'users', cred.user.uid))
       const status = snap.exists() ? snap.data().status : null
       if (status === 'pending') {
         await signOut(auth); setError('Your account is pending approval by an admin.'); setLoading(false); return
@@ -66,7 +66,7 @@ export default function Login() {
                 className="w-full rounded-md px-3 py-2.5 text-sm outline-none transition-colors"
                 style={{ background: '#1a2540', border: '1px solid #1e3a52', color: '#e0f2fe' }}
                 onFocus={e => e.target.style.borderColor = '#0284c7'}
-                onBlur={e  => e.target.style.borderColor = '#1e3a52'} />
+                onBlur={e => e.target.style.borderColor = '#1e3a52'} />
             </div>
             <div>
               <label className="block text-xs uppercase tracking-wider mb-1.5" style={{ color: '#3d6480' }}>Password</label>
@@ -75,7 +75,7 @@ export default function Login() {
                 className="w-full rounded-md px-3 py-2.5 text-sm outline-none transition-colors"
                 style={{ background: '#1a2540', border: '1px solid #1e3a52', color: '#e0f2fe' }}
                 onFocus={e => e.target.style.borderColor = '#0284c7'}
-                onBlur={e  => e.target.style.borderColor = '#1e3a52'} />
+                onBlur={e => e.target.style.borderColor = '#1e3a52'} />
             </div>
             {error && (
               <div className="text-xs font-mono flex items-center gap-2" style={{ color: '#f87171' }}>
@@ -86,7 +86,7 @@ export default function Login() {
               className="w-full font-medium text-sm py-2.5 rounded-md transition-colors disabled:opacity-50 mt-2 text-white"
               style={{ background: '#0284c7' }}
               onMouseOver={e => e.currentTarget.style.background = '#38bdf8'}
-              onMouseOut={e  => e.currentTarget.style.background = '#0284c7'}>
+              onMouseOut={e => e.currentTarget.style.background = '#0284c7'}>
               {loading ? 'Signing in...' : 'Sign in'}
             </button>
           </form>
@@ -96,7 +96,7 @@ export default function Login() {
           <div className="mt-1">
             <Link to="/signup" className="transition-colors" style={{ color: '#3d6480', opacity: 0.6 }}
               onMouseOver={e => e.target.style.opacity = '1'}
-              onMouseOut={e  => e.target.style.opacity = '0.6'}>
+              onMouseOut={e => e.target.style.opacity = '0.6'}>
               Request access
             </Link>
           </div>

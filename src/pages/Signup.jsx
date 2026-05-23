@@ -1,26 +1,26 @@
-import { useState }                                from 'react'
-import { Link }                                    from 'react-router-dom'
+import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { createUserWithEmailAndPassword, signOut } from 'firebase/auth'
-import { doc, setDoc }                             from 'firebase/firestore'
-import { auth, db }                                from '../firebase/config'
+import { doc, setDoc } from 'firebase/firestore'
+import { auth, db } from '../firebase/config'
 
 const ALLOWED_DOMAIN = '@mymail.mail'
 
 export default function Signup() {
-  const [email,    setEmail]    = useState('')
+  const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [confirm,  setConfirm]  = useState('')
-  const [error,    setError]    = useState('')
-  const [loading,  setLoading]  = useState(false)
-  const [done,     setDone]     = useState(false)
+  const [confirm, setConfirm] = useState('')
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [done, setDone] = useState(false)
 
   async function handleSignup(e) {
     e.preventDefault()
     setError('')
     if (!email || !password || !confirm) { setError('Please fill in all fields.'); return }
     if (!email.endsWith(ALLOWED_DOMAIN)) { setError(`Only ${ALLOWED_DOMAIN} addresses are allowed.`); return }
-    if (password.length < 6)             { setError('Password must be at least 6 characters.'); return }
-    if (password !== confirm)            { setError('Passwords do not match.'); return }
+    if (password.length < 6) { setError('Password must be at least 6 characters.'); return }
+    if (password !== confirm) { setError('Passwords do not match.'); return }
     setLoading(true)
     try {
       const cred = await createUserWithEmailAndPassword(auth, email, password)
@@ -34,9 +34,9 @@ export default function Signup() {
       setLoading(false)
       switch (err.code) {
         case 'auth/email-already-in-use': setError('An account with this email already exists.'); break
-        case 'auth/invalid-email':        setError('Please enter a valid email address.'); break
-        case 'auth/weak-password':        setError('Password must be at least 6 characters.'); break
-        default:                          setError('Something went wrong. Please try again.')
+        case 'auth/invalid-email': setError('Please enter a valid email address.'); break
+        case 'auth/weak-password': setError('Password must be at least 6 characters.'); break
+        default: setError('Something went wrong. Please try again.')
       }
     }
   }
@@ -64,9 +64,9 @@ export default function Signup() {
               </div>
               <form onSubmit={handleSignup} className="space-y-4">
                 {[
-                  { label: 'Email',            id: 'email',    type: 'email',    val: email,    set: setEmail,    ph: `you${ALLOWED_DOMAIN}` },
-                  { label: 'Password',         id: 'password', type: 'password', val: password, set: setPassword, ph: 'Min. 6 characters' },
-                  { label: 'Confirm password', id: 'confirm',  type: 'password', val: confirm,  set: setConfirm,  ph: 'Repeat password' },
+                  { label: 'Email', id: 'email', type: 'email', val: email, set: setEmail, ph: `you${ALLOWED_DOMAIN}` },
+                  { label: 'Password', id: 'password', type: 'password', val: password, set: setPassword, ph: 'Min. 6 characters' },
+                  { label: 'Confirm password', id: 'confirm', type: 'password', val: confirm, set: setConfirm, ph: 'Repeat password' },
                 ].map(f => (
                   <div key={f.id}>
                     <label className="block text-xs uppercase tracking-wider mb-1.5" style={{ color: '#3d6480' }}>{f.label}</label>
@@ -74,7 +74,7 @@ export default function Signup() {
                       className="w-full rounded-md px-3 py-2.5 text-sm outline-none transition-colors"
                       style={{ background: '#1a2540', border: '1px solid #1e3a52', color: '#e0f2fe' }}
                       onFocus={e => e.target.style.borderColor = '#0284c7'}
-                      onBlur={e  => e.target.style.borderColor = '#1e3a52'} />
+                      onBlur={e => e.target.style.borderColor = '#1e3a52'} />
                   </div>
                 ))}
                 {error && <div className="text-xs font-mono" style={{ color: '#f87171' }}>! {error}</div>}
@@ -82,7 +82,7 @@ export default function Signup() {
                   className="w-full font-medium text-sm py-2.5 rounded-md transition-colors disabled:opacity-50 mt-2 text-white"
                   style={{ background: '#0284c7' }}
                   onMouseOver={e => e.currentTarget.style.background = '#38bdf8'}
-                  onMouseOut={e  => e.currentTarget.style.background = '#0284c7'}>
+                  onMouseOut={e => e.currentTarget.style.background = '#0284c7'}>
                   {loading ? 'Submitting...' : 'Request access'}
                 </button>
               </form>
@@ -103,7 +103,7 @@ export default function Signup() {
           Already have an account?{' '}
           <Link to="/login" className="transition-colors" style={{ color: '#7da8c4' }}
             onMouseOver={e => e.target.style.color = '#38bdf8'}
-            onMouseOut={e  => e.target.style.color = '#7da8c4'}>
+            onMouseOut={e => e.target.style.color = '#7da8c4'}>
             Sign in
           </Link>
         </div>
