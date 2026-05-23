@@ -4,6 +4,7 @@ import { collection, query,
          doc, updateDoc }      from 'firebase/firestore'
 import { db }                  from '../firebase/config'
 import { useAuth }             from '../context/AuthContext'
+import StatusBadge from '../components/StatusBadge'
 
 function NoteModal({ client, onClose, onSaved, canEdit }) {
   const [notes, setNotes] = useState(client.notes || '')
@@ -219,16 +220,7 @@ export default function Notes() {
                   <div className="text-sm font-medium truncate" style={{ color: 'var(--text)' }}>
                     {c.name}
                   </div>
-                  <span
-                    className="text-xs font-mono px-2 py-0.5 rounded ml-2 flex-shrink-0"
-                    style={{
-                      background: c.status === 'active' ? '#1a3d28' : c.status === 'inactive' ? '#2d2316' : '#1e2e3d',
-                      color:      c.status === 'active' ? '#5fbb87' : c.status === 'inactive' ? '#c0894a' : '#5b9bd5',
-                      border: `1px solid ${c.status === 'active' ? '#2e6644' : c.status === 'inactive' ? '#5a3e1a' : '#2a4a6a'}`,
-                    }}
-                  >
-                    {c.status || 'active'}
-                  </span>
+                  <StatusBadge status={c.status} />
                 </div>
 
                 {/* Note preview */}
