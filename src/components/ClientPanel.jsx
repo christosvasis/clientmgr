@@ -1,27 +1,27 @@
 import { useState, useEffect } from 'react'
-import { doc, updateDoc }      from 'firebase/firestore'
-import { db }                  from '../firebase/config'
-import { useAuth }             from '../context/AuthContext'
-import StatusBadge             from './StatusBadge'
+import { doc, updateDoc } from 'firebase/firestore'
+import { db } from '../firebase/config'
+import { useAuth } from '../context/AuthContext'
+import StatusBadge from './StatusBadge'
 
 const STATUS_OPTIONS = [
-  { value: 'active',   label: 'Active'   },
+  { value: 'active', label: 'Active' },
   { value: 'inactive', label: 'Inactive' },
-  { value: 'on_hold',  label: 'On Hold'  },
+  { value: 'on_hold', label: 'On Hold' },
 ]
 
 export default function ClientPanel({ client, onClose, onUpdated }) {
   const { isAdmin, isPowerUser } = useAuth()
   const canEdit = isAdmin || isPowerUser
 
-  const [notes,  setNotes]  = useState(client?.notes  || '')
+  const [notes, setNotes] = useState(client?.notes || '')
   const [status, setStatus] = useState(client?.status || 'active')
   const [saving, setSaving] = useState(false)
   const [copied, setCopied] = useState(false)
 
   useEffect(() => {
     if (client) {
-      setNotes(client.notes   || '')
+      setNotes(client.notes || '')
       setStatus(client.status || 'active')
     }
   }, [client?.id])
@@ -45,8 +45,8 @@ export default function ClientPanel({ client, onClose, onUpdated }) {
 
   function launch(software) {
     const url = `clientmgr://launch/${client.path}/${software.key}`
-    const a   = document.createElement('a')
-    a.href    = url
+    const a = document.createElement('a')
+    a.href = url
     document.body.appendChild(a)
     a.click()
     document.body.removeChild(a)
@@ -57,8 +57,10 @@ export default function ClientPanel({ client, onClose, onUpdated }) {
   return (
     <>
       <div className="fixed inset-0 z-20" style={{ background: 'rgba(0,0,0,0.4)' }} onClick={onClose} />
-      <div className="fixed right-0 top-0 h-full z-30 flex flex-col shadow-2xl"
-        style={{ width: '440px', background: 'var(--bg2)', borderLeft: '1px solid var(--border)' }}>
+      <div
+        className="fixed right-0 top-0 h-full z-30 flex flex-col shadow-2xl w-full sm:w-[440px]"
+        style={{ background: 'var(--bg2)', borderLeft: '1px solid var(--border)' }}
+      >
 
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 flex-shrink-0"
@@ -70,7 +72,7 @@ export default function ClientPanel({ client, onClose, onUpdated }) {
           <button onClick={onClose} className="text-lg transition-colors font-mono"
             style={{ color: 'var(--text3)' }}
             onMouseOver={e => e.target.style.color = 'var(--text)'}
-            onMouseOut={e  => e.target.style.color = 'var(--text3)'}>
+            onMouseOut={e => e.target.style.color = 'var(--text3)'}>
             x
           </button>
         </div>
@@ -123,7 +125,7 @@ export default function ClientPanel({ client, onClose, onUpdated }) {
                       className="text-xs px-3 py-1.5 rounded transition-colors"
                       style={{ background: 'var(--btn-bg)', border: '1px solid var(--border)', color: 'var(--accent)' }}
                       onMouseOver={e => { e.currentTarget.style.background = 'var(--accent2)'; e.currentTarget.style.color = '#ffffff'; e.currentTarget.style.borderColor = 'var(--accent2)' }}
-                      onMouseOut={e  => { e.currentTarget.style.background = 'var(--btn-bg)';  e.currentTarget.style.color = 'var(--accent)'; e.currentTarget.style.borderColor = 'var(--border)' }}>
+                      onMouseOut={e => { e.currentTarget.style.background = 'var(--btn-bg)'; e.currentTarget.style.color = 'var(--accent)'; e.currentTarget.style.borderColor = 'var(--border)' }}>
                       Launch
                     </button>
                   </div>
@@ -143,7 +145,7 @@ export default function ClientPanel({ client, onClose, onUpdated }) {
                 className="w-full rounded-md px-3 py-2 text-sm font-mono outline-none transition-colors resize-none"
                 style={inputStyle}
                 onFocus={e => e.target.style.borderColor = 'var(--accent2)'}
-                onBlur={e  => e.target.style.borderColor = 'var(--border)'} />
+                onBlur={e => e.target.style.borderColor = 'var(--border)'} />
             ) : (
               <div className="text-sm font-mono rounded-md px-3 py-2 min-h-[80px]"
                 style={{ background: 'var(--bg3)', border: '1px solid var(--border)', color: 'var(--text2)' }}>
@@ -160,7 +162,7 @@ export default function ClientPanel({ client, onClose, onUpdated }) {
               className="w-full text-sm font-medium py-2.5 rounded-md transition-colors disabled:opacity-50 text-white"
               style={{ background: 'var(--accent2)' }}
               onMouseOver={e => { e.currentTarget.style.background = 'var(--accent)'; e.currentTarget.style.color = 'var(--bg)' }}
-              onMouseOut={e  => { e.currentTarget.style.background = 'var(--accent2)'; e.currentTarget.style.color = '#ffffff' }}>
+              onMouseOut={e => { e.currentTarget.style.background = 'var(--accent2)'; e.currentTarget.style.color = '#ffffff' }}>
               {saving ? 'Saving...' : 'Save changes'}
             </button>
           </div>

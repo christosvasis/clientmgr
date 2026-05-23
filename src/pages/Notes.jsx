@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react'
-import { collection, query,
-         orderBy, onSnapshot,
-         doc, updateDoc }      from 'firebase/firestore'
-import { db }                  from '../firebase/config'
-import { useAuth }             from '../context/AuthContext'
+import {
+  collection, query,
+  orderBy, onSnapshot,
+  doc, updateDoc
+} from 'firebase/firestore'
+import { db } from '../firebase/config'
+import { useAuth } from '../context/AuthContext'
 import StatusBadge from '../components/StatusBadge'
 
 function NoteModal({ client, onClose, onSaved, canEdit }) {
@@ -29,12 +31,13 @@ function NoteModal({ client, onClose, onSaved, canEdit }) {
       >
         {/* Modal */}
         <div
-          className="w-full rounded-xl shadow-2xl flex flex-col"
+          className="w-full sm:rounded-xl shadow-2xl flex flex-col"
           style={{
-            maxWidth:   '560px',
-            maxHeight:  '80vh',
+            maxWidth: '560px',
+            height: 'calc(100vh - 48px)',
+            maxHeight: '80vh',
             background: 'var(--bg2)',
-            border:     '1px solid var(--border)',
+            border: '1px solid var(--border)',
           }}
           onClick={e => e.stopPropagation()}
         >
@@ -52,7 +55,7 @@ function NoteModal({ client, onClose, onSaved, canEdit }) {
               className="text-lg transition-colors font-mono"
               style={{ color: 'var(--text3)' }}
               onMouseOver={e => e.target.style.color = 'var(--text)'}
-              onMouseOut={e  => e.target.style.color = 'var(--text3)'}
+              onMouseOut={e => e.target.style.color = 'var(--text3)'}
             >
               x
             </button>
@@ -68,12 +71,12 @@ function NoteModal({ client, onClose, onSaved, canEdit }) {
                 className="w-full rounded-md px-3 py-2 text-sm font-mono outline-none transition-colors resize-none"
                 style={{
                   background: 'var(--bg3)',
-                  border:     '1px solid var(--border)',
-                  color:      'var(--text)',
-                  minHeight:  '200px',
+                  border: '1px solid var(--border)',
+                  color: 'var(--text)',
+                  minHeight: '200px',
                 }}
                 onFocus={e => e.target.style.borderColor = 'var(--accent2)'}
-                onBlur={e  => e.target.style.borderColor = 'var(--border)'}
+                onBlur={e => e.target.style.borderColor = 'var(--border)'}
                 autoFocus
               />
             ) : (
@@ -105,7 +108,7 @@ function NoteModal({ client, onClose, onSaved, canEdit }) {
                 className="text-sm font-medium px-5 py-2 rounded-md transition-colors disabled:opacity-50 text-white"
                 style={{ background: 'var(--accent2)' }}
                 onMouseOver={e => { e.currentTarget.style.background = 'var(--accent)'; e.currentTarget.style.color = 'var(--bg)' }}
-                onMouseOut={e  => { e.currentTarget.style.background = 'var(--accent2)'; e.currentTarget.style.color = '#ffffff' }}
+                onMouseOut={e => { e.currentTarget.style.background = 'var(--accent2)'; e.currentTarget.style.color = '#ffffff' }}
               >
                 {saving ? 'Saving...' : 'Save'}
               </button>
@@ -121,13 +124,13 @@ export default function Notes() {
   const { isAdmin, isPowerUser } = useAuth()
   const canEdit = isAdmin || isPowerUser
 
-  const [clients,       setClients]       = useState([])
-  const [search,        setSearch]        = useState('')
-  const [loading,       setLoading]       = useState(true)
-  const [openClient,    setOpenClient]    = useState(null)
+  const [clients, setClients] = useState([])
+  const [search, setSearch] = useState('')
+  const [loading, setLoading] = useState(true)
+  const [openClient, setOpenClient] = useState(null)
 
   useEffect(() => {
-    const q     = query(collection(db, 'clients'), orderBy('name'))
+    const q = query(collection(db, 'clients'), orderBy('name'))
     const unsub = onSnapshot(q, snap => {
       setClients(snap.docs.map(d => ({ id: d.id, ...d.data() })))
       setLoading(false)
@@ -139,7 +142,7 @@ export default function Notes() {
     c.notes?.trim() &&
     (search
       ? c.name.toLowerCase().includes(search.toLowerCase()) ||
-        c.notes.toLowerCase().includes(search.toLowerCase())
+      c.notes.toLowerCase().includes(search.toLowerCase())
       : true
     )
   )
@@ -147,9 +150,9 @@ export default function Notes() {
   // All clients for "no notes yet" state (to show empty cards)
   const allFiltered = search
     ? clients.filter(c =>
-        c.name.toLowerCase().includes(search.toLowerCase()) ||
-        (c.notes || '').toLowerCase().includes(search.toLowerCase())
-      )
+      c.name.toLowerCase().includes(search.toLowerCase()) ||
+      (c.notes || '').toLowerCase().includes(search.toLowerCase())
+    )
     : clients
 
   function handleSaved(updated) {
@@ -182,7 +185,7 @@ export default function Notes() {
             className="w-full rounded-lg px-4 py-2 text-sm outline-none transition-colors"
             style={{ background: 'var(--bg2)', border: '1px solid var(--border)', color: 'var(--text)' }}
             onFocus={e => e.target.style.borderColor = 'var(--accent2)'}
-            onBlur={e  => e.target.style.borderColor = 'var(--border)'}
+            onBlur={e => e.target.style.borderColor = 'var(--border)'}
           />
           {search && (
             <button
@@ -190,7 +193,7 @@ export default function Notes() {
               className="absolute right-3 top-1/2 -translate-y-1/2 transition-colors text-sm font-mono"
               style={{ color: 'var(--text3)' }}
               onMouseOver={e => e.target.style.color = 'var(--text)'}
-              onMouseOut={e  => e.target.style.color = 'var(--text3)'}
+              onMouseOut={e => e.target.style.color = 'var(--text3)'}
             >
               x
             </button>
@@ -213,7 +216,7 @@ export default function Notes() {
                 className="text-left rounded-lg p-4 transition-colors"
                 style={{ background: 'var(--bg2)', border: '1px solid var(--border)' }}
                 onMouseOver={e => { e.currentTarget.style.borderColor = 'var(--accent2)'; e.currentTarget.style.background = 'var(--bg3)' }}
-                onMouseOut={e  => { e.currentTarget.style.borderColor = 'var(--border)';  e.currentTarget.style.background = 'var(--bg2)' }}
+                onMouseOut={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.background = 'var(--bg2)' }}
               >
                 {/* Card header */}
                 <div className="flex items-center justify-between mb-2">
