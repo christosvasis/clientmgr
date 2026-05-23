@@ -1,11 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
-import {
-  collection, query,
-  orderBy, onSnapshot
-} from 'firebase/firestore'
-import { db } from '../firebase/config'
+import { useClients } from '../hooks/useClients'
 import StatusBadge from '../components/StatusBadge'
 import ClientPanel from '../components/ClientPanel'
+import SearchInput from '../components/ui/SearchInput'
 
 function highlight(text, q) {
   if (!q) return text
@@ -23,21 +20,13 @@ function highlight(text, q) {
 }
 
 export default function Home() {
-  const [clients, setClients] = useState([])
+  const { clients, setClients } = useClients()
   const [search, setSearch] = useState('')
   const [selectedClient, setSelectedClient] = useState(null)
   const [recentlyUsed, setRecentlyUsed] = useState(
     () => JSON.parse(localStorage.getItem('recentlyUsed') || '[]')
   )
   const searchRef = useRef(null)
-
-  useEffect(() => {
-    const q = query(collection(db, 'clients'), orderBy('name'))
-    const unsub = onSnapshot(q, snap => {
-      setClients(snap.docs.map(d => ({ id: d.id, ...d.data() })))
-    })
-    return unsub
-  }, [])
 
   useEffect(() => {
     function onKey(e) {
@@ -73,8 +62,6 @@ export default function Home() {
 
   return (
     <div className="p-6 flex flex-col h-full min-h-0" style={{ background: 'var(--bg)' }}>
-
-      {/* Centered container */}
       <div className="w-full mx-auto" style={{ maxWidth: '640px' }}>
 
         {/* Recently used */}
@@ -88,16 +75,13 @@ export default function Home() {
                 <button
                   key={name}
                   onClick={() => {
-                    setSearch(name)
-                    setTimeout(() => {
-                      const client = clients.find(c => c.name === name)
-                      if (client) openClient(client)
-                    }, 50)
+                    const client = clients.find(c => c.name === name)
+                    if (client) {
+                      setSearch(name)
+                      openClient(client)
+                    }
                   }}
-                  className="flex items-center gap-2 text-xs rounded-full px-3 py-1 transition-colors"
-                  style={{ background: 'var(--bg2)', border: '1px solid var(--border)', color: 'var(--text2)' }}
-                  onMouseOver={e => { e.currentTarget.style.borderColor = 'var(--accent2)'; e.currentTarget.style.color = 'var(--text)' }}
-                  onMouseOut={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.color = 'var(--text2)' }}
+                  className="cm-chip flex items-center gap-2 text-xs rounded-full px-3 py-1 transition-colors"
                 >
                   <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: 'var(--accent)' }} />
                   {name}
@@ -108,29 +92,13 @@ export default function Home() {
         )}
 
         {/* Search */}
-        <div className="relative mb-3">
-          <input
-            ref={searchRef}
-            type="text"
+        <div className="mb-3">
+          <SearchInput
             value={search}
-            onChange={e => setSearch(e.target.value)}
+            onChange={setSearch}
             placeholder="Type a client name to search..."
-            className="w-full rounded-lg px-4 py-2 text-sm outline-none transition-colors"
-            style={{ background: 'var(--bg2)', border: '1px solid var(--border)', color: 'var(--text)' }}
-            onFocus={e => e.target.style.borderColor = 'var(--accent2)'}
-            onBlur={e => e.target.style.borderColor = 'var(--border)'}
+            inputRef={searchRef}
           />
-          {search && (
-            <button
-              onClick={() => setSearch('')}
-              className="absolute right-3 top-1/2 -translate-y-1/2 transition-colors text-sm font-mono"
-              style={{ color: 'var(--text3)' }}
-              onMouseOver={e => e.target.style.color = 'var(--text)'}
-              onMouseOut={e => e.target.style.color = 'var(--text3)'}
-            >
-              x
-            </button>
-          )}
         </div>
 
         {/* Result count */}
@@ -158,11 +126,7 @@ export default function Home() {
               <thead>
                 <tr style={{ borderBottom: '1px solid var(--border)' }}>
                   {['Client', 'Status', 'Path', ''].map((h, i) => (
-                    <th
-                      key={i}
-                      className="text-left text-xs uppercase tracking-wider px-4 py-2.5"
-                      style={{ color: 'var(--text3)' }}
-                    >
+                    <th key={i} className="text-left text-xs uppercase tracking-wider px-4 py-2.5" style={{ color: 'var(--text3)' }}>
                       {h}
                     </th>
                   ))}
@@ -173,10 +137,8 @@ export default function Home() {
                   <tr
                     key={client.id}
                     onClick={() => openClient(client)}
-                    className="cursor-pointer transition-colors last:border-0"
+                    className="cm-row cursor-pointer transition-colors last:border-0"
                     style={{ borderBottom: '1px solid var(--border)' }}
-                    onMouseOver={e => e.currentTarget.style.background = 'var(--bg3)'}
-                    onMouseOut={e => e.currentTarget.style.background = 'transparent'}
                   >
                     <td className="px-4 py-2.5 text-sm font-medium" style={{ color: 'var(--text)' }}>
                       {highlight(client.name, search)}
@@ -184,19 +146,13 @@ export default function Home() {
                     <td className="px-4 py-2.5">
                       <StatusBadge status={client.status} />
                     </td>
-                    <td
-                      className="px-4 py-2.5 text-xs font-mono max-w-[140px] truncate"
-                      style={{ color: 'var(--text3)' }}
-                    >
+                    <td className="px-4 py-2.5 text-xs font-mono max-w-[140px] truncate" style={{ color: 'var(--text3)' }}>
                       {client.path}
                     </td>
                     <td className="px-4 py-2.5">
                       <button
                         onClick={e => copyPath(e, client.path)}
-                        className="text-xs transition-colors font-mono"
-                        style={{ color: 'var(--text3)' }}
-                        onMouseOver={e => e.target.style.color = 'var(--accent)'}
-                        onMouseOut={e => e.target.style.color = 'var(--text3)'}
+                        className="cm-hover-accent text-xs transition-colors font-mono"
                         title="Copy path"
                       >
                         copy
@@ -211,7 +167,6 @@ export default function Home() {
 
       </div>
 
-      {/* Client panel */}
       {selectedClient && (
         <ClientPanel
           client={selectedClient}

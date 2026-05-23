@@ -1,13 +1,4 @@
-import { initializeApp, getApps, cert } from 'firebase-admin/app'
-import { getAuth }                       from 'firebase-admin/auth'
-import { getFirestore }                  from 'firebase-admin/firestore'
-
-if (!getApps().length) {
-  initializeApp({ credential: cert(JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT)) })
-}
-
-const adminAuth = getAuth()
-const db        = getFirestore()
+import { adminAuth, db } from './_firebase.js'
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })

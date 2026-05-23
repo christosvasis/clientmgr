@@ -5,8 +5,8 @@ import Signup from './pages/Signup'
 import Dashboard from './pages/Dashboard'
 
 function ProtectedRoute({ children }) {
-  const { user, isApproved } = useAuth()
-  if (user === undefined) return null
+  const { user, isApproved, loading } = useAuth()
+  if (loading) return null
   if (!user) return <Navigate to="/login" replace />
   if (!isApproved) return <Navigate to="/login" replace />
   return children

@@ -1,13 +1,4 @@
-import { initializeApp, getApps, cert } from 'firebase-admin/app'
-import { getAuth }                       from 'firebase-admin/auth'
-import { getFirestore }                  from 'firebase-admin/firestore'
-
-if (!getApps().length) {
-  initializeApp({ credential: cert(JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT)) })
-}
-
-const adminAuth = getAuth()
-const db        = getFirestore()
+import { adminAuth, db } from './_firebase.js'
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
@@ -23,13 +14,12 @@ export default async function handler(req, res) {
   try {
     const newUser = await adminAuth.createUser({ email, password })
     await db.collection('users').doc(newUser.uid).set({
-      email, isAdmin: isAdmin || false, isPowerUser: isPowerUser || false,
-      status: 'approved', createdAt: new Date().toISOString()
+      email, isAdmin, isPowerUser, status: 'approved', createdAt: new Date().toISOString(),
     })
     return res.status(200).json({ uid: newUser.uid, email })
   } catch (e) {
     if (e.code === 'auth/email-already-exists') return res.status(400).json({ error: 'A user with this email already exists.' })
-    if (e.code === 'auth/invalid-password')     return res.status(400).json({ error: 'Password must be at least 6 characters.' })
+    if (e.code === 'auth/invalid-password') return res.status(400).json({ error: 'Password must be at least 6 characters.' })
     return res.status(500).json({ error: 'Failed to create user.' })
   }
 }
