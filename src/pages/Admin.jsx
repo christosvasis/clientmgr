@@ -1,14 +1,14 @@
-import { useState }       from 'react'
-import { useAuth }        from '../context/AuthContext'
-import { Navigate }       from 'react-router-dom'
-import Tabs               from '../components/Tabs'
-import PendingRequests    from '../components/admin/PendingRequests'
-import ClientManager      from '../components/admin/ClientManager'
-import UserManager        from '../components/admin/UserManager'
+import { useState } from 'react'
+import { useAuth } from '../context/AuthContext'
+import { Navigate } from 'react-router-dom'
+import Tabs from '../components/Tabs'
+import PendingRequests from '../components/admin/PendingRequests'
+import ClientManager from '../components/admin/ClientManager'
+import UserManager from '../components/admin/UserManager'
 
 export default function Admin() {
-  const { isAdmin }                     = useAuth()
-  const [tab, setTab]                   = useState('pending')
+  const { isAdmin } = useAuth()
+  const [tab, setTab] = useState('pending')
   const [pendingCount, setPendingCount] = useState(0)
 
   if (!isAdmin) return <Navigate to="/" replace />
@@ -16,7 +16,7 @@ export default function Admin() {
   const tabs = [
     { value: 'pending', label: 'Pending', count: pendingCount },
     { value: 'clients', label: 'Clients', count: 0 },
-    { value: 'users',   label: 'Users',   count: 0 },
+    { value: 'users', label: 'Users', count: 0 },
   ]
 
   return (
@@ -35,9 +35,11 @@ export default function Admin() {
           <Tabs tabs={tabs} active={tab} onChange={setTab} noMargin />
         </div>
 
-        {tab === 'pending' && <PendingRequests onCountChange={setPendingCount} />}
-        {tab === 'clients' && <ClientManager />}
-        {tab === 'users'   && <UserManager />}
+        <div className="overflow-x-auto">
+          {tab === 'pending' && <PendingRequests onCountChange={setPendingCount} />}
+          {tab === 'clients' && <ClientManager />}
+          {tab === 'users' && <UserManager />}
+        </div>
 
       </div>
     </div>

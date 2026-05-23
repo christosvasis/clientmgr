@@ -1,25 +1,27 @@
-import { useState, useEffect }             from 'react'
-import { collection, onSnapshot, addDoc,
-         deleteDoc, updateDoc, doc,
-         orderBy, query }                  from 'firebase/firestore'
-import { db }                              from '../../firebase/config'
+import { useState, useEffect } from 'react'
+import {
+  collection, onSnapshot, addDoc,
+  deleteDoc, updateDoc, doc,
+  orderBy, query
+} from 'firebase/firestore'
+import { db } from '../../firebase/config'
 import StatusBadge from '../StatusBadge'
 
 const EMPTY_CLIENT = { name: '', path: '', status: 'active', notes: '', software: [] }
-const EMPTY_SW     = { key: '', label: '', exe: '' }
+const EMPTY_SW = { key: '', label: '', exe: '' }
 
 export default function ClientManager() {
-  const [clients,  setClients]  = useState([])
-  const [loading,  setLoading]  = useState(true)
-  const [form,     setForm]     = useState(EMPTY_CLIENT)
+  const [clients, setClients] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [form, setForm] = useState(EMPTY_CLIENT)
   const [software, setSoftware] = useState([{ ...EMPTY_SW }])
-  const [editing,  setEditing]  = useState(null)
-  const [saving,   setSaving]   = useState(false)
-  const [error,    setError]    = useState('')
-  const [success,  setSuccess]  = useState('')
+  const [editing, setEditing] = useState(null)
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState('')
+  const [success, setSuccess] = useState('')
 
   useEffect(() => {
-    const q     = query(collection(db, 'clients'), orderBy('name'))
+    const q = query(collection(db, 'clients'), orderBy('name'))
     const unsub = onSnapshot(q, snap => {
       setClients(snap.docs.map(d => ({ id: d.id, ...d.data() })))
       setLoading(false)
@@ -45,7 +47,7 @@ export default function ClientManager() {
     setSoftware(prev => prev.map((sw, idx) => idx === i ? { ...sw, [field]: value } : sw))
   }
 
-  function addSW()     { setSoftware(prev => [...prev, { ...EMPTY_SW }]) }
+  function addSW() { setSoftware(prev => [...prev, { ...EMPTY_SW }]) }
   function removeSW(i) { setSoftware(prev => prev.filter((_, idx) => idx !== i)) }
 
   function validate() {
@@ -54,8 +56,8 @@ export default function ClientManager() {
     for (const sw of software) {
       if (sw.label || sw.exe || sw.key) {
         if (!sw.label.trim()) return 'Software label is required.'
-        if (!sw.exe.trim())   return 'Software exe is required.'
-        if (!sw.key.trim())   return 'Software key is required.'
+        if (!sw.exe.trim()) return 'Software exe is required.'
+        if (!sw.key.trim()) return 'Software key is required.'
       }
     }
     return null
@@ -66,10 +68,10 @@ export default function ClientManager() {
     if (err) { setError(err); return }
     setSaving(true); setError('')
     const cleanSW = software.filter(sw => sw.label && sw.exe && sw.key)
-    const data    = { ...form, software: cleanSW }
+    const data = { ...form, software: cleanSW }
     try {
       if (editing) { await updateDoc(doc(db, 'clients', editing), data) }
-      else         { await addDoc(collection(db, 'clients'), data) }
+      else { await addDoc(collection(db, 'clients'), data) }
       setSuccess(editing ? 'Client updated.' : 'Client added.')
       setTimeout(() => setSuccess(''), 2000)
       cancelEdit()
@@ -83,8 +85,8 @@ export default function ClientManager() {
   }
 
   const inputStyle = { background: 'var(--bg3)', border: '1px solid var(--border)', color: 'var(--text)' }
-  const onFocus    = e => e.target.style.borderColor = 'var(--accent2)'
-  const onBlur     = e => e.target.style.borderColor = 'var(--border)'
+  const onFocus = e => e.target.style.borderColor = 'var(--accent2)'
+  const onBlur = e => e.target.style.borderColor = 'var(--border)'
   const inputClass = "w-full rounded px-3 py-2 text-sm outline-none transition-colors"
 
   return (
@@ -124,11 +126,11 @@ export default function ClientManager() {
           <div className="space-y-2">
             {software.map((sw, i) => (
               <div key={i} className="grid grid-cols-[1fr_1fr_1fr_auto] gap-2 items-center">
-                <input value={sw.key}   onChange={e => updateSW(i, 'key',   e.target.value)}
+                <input value={sw.key} onChange={e => updateSW(i, 'key', e.target.value)}
                   placeholder="sw_1" className="rounded px-3 py-2 text-xs font-mono outline-none" style={inputStyle} onFocus={onFocus} onBlur={onBlur} />
                 <input value={sw.label} onChange={e => updateSW(i, 'label', e.target.value)}
                   placeholder="CRM Tool" className="rounded px-3 py-2 text-xs outline-none" style={inputStyle} onFocus={onFocus} onBlur={onBlur} />
-                <input value={sw.exe}   onChange={e => updateSW(i, 'exe',   e.target.value)}
+                <input value={sw.exe} onChange={e => updateSW(i, 'exe', e.target.value)}
                   placeholder="crm.exe" className="rounded px-3 py-2 text-xs font-mono outline-none" style={inputStyle} onFocus={onFocus} onBlur={onBlur} />
                 <button onClick={() => removeSW(i)} className="text-sm px-1 font-mono" style={{ color: 'var(--danger)' }}>x</button>
               </div>
@@ -143,7 +145,7 @@ export default function ClientManager() {
             className="w-full rounded px-3 py-2 text-sm font-mono outline-none resize-none"
             style={inputStyle} onFocus={onFocus} onBlur={onBlur} />
         </div>
-        {error   && <div className="text-xs font-mono mb-3" style={{ color: 'var(--danger)' }}>{error}</div>}
+        {error && <div className="text-xs font-mono mb-3" style={{ color: 'var(--danger)' }}>{error}</div>}
         {success && <div className="text-xs font-mono mb-3" style={{ color: '#5fbb87' }}>{success}</div>}
         <div className="flex gap-2">
           <button onClick={handleSave} disabled={saving}
@@ -182,7 +184,7 @@ export default function ClientManager() {
                 <tr key={c.id} className="last:border-0 transition-colors"
                   style={{ borderBottom: '1px solid var(--border)' }}
                   onMouseOver={e => e.currentTarget.style.background = 'var(--bg3)'}
-                  onMouseOut={e  => e.currentTarget.style.background = 'transparent'}>
+                  onMouseOut={e => e.currentTarget.style.background = 'transparent'}>
                   <td className="px-4 py-3 text-sm font-medium" style={{ color: 'var(--text)' }}>{c.name}</td>
                   <td className="px-4 py-3 text-xs font-mono" style={{ color: 'var(--text3)' }}>{c.path}</td>
                   <td className="px-4 py-3">

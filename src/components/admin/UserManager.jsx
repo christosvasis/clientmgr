@@ -1,16 +1,16 @@
-import { useState, useEffect }    from 'react'
+import { useState, useEffect } from 'react'
 import { collection, onSnapshot } from 'firebase/firestore'
-import { db }                      from '../../firebase/config'
-import { useAuth }                 from '../../context/AuthContext'
+import { db } from '../../firebase/config'
+import { useAuth } from '../../context/AuthContext'
 import StatusBadge from '../StatusBadge'
 
 export default function UserManager() {
   const { user: currentUser } = useAuth()
-  const [users,   setUsers]   = useState([])
+  const [users, setUsers] = useState([])
   const [loading, setLoading] = useState(true)
-  const [form,    setForm]    = useState({ email: '', password: '', isAdmin: false, isPowerUser: false })
-  const [saving,  setSaving]  = useState(false)
-  const [error,   setError]   = useState('')
+  const [form, setForm] = useState({ email: '', password: '', isAdmin: false, isPowerUser: false })
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
 
   useEffect(() => {
@@ -32,7 +32,7 @@ export default function UserManager() {
     setSaving(true); setError('')
     try {
       const token = await getToken()
-      const res   = await fetch('/api/create-user', {
+      const res = await fetch('/api/create-user', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify(form)
@@ -49,7 +49,7 @@ export default function UserManager() {
   async function handleUpdateRole(uid, field, value) {
     try {
       const token = await getToken()
-      const user  = users.find(u => u.uid === uid)
+      const user = users.find(u => u.uid === uid)
       await fetch('/api/update-user', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
@@ -62,7 +62,7 @@ export default function UserManager() {
     if (!confirm(`Delete "${email}"? This cannot be undone.`)) return
     try {
       const token = await getToken()
-      const res   = await fetch('/api/delete-user', {
+      const res = await fetch('/api/delete-user', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ uid })
@@ -73,8 +73,8 @@ export default function UserManager() {
   }
 
   const inputStyle = { background: 'var(--bg3)', border: '1px solid var(--border)', color: 'var(--text)' }
-  const onFocus    = e => e.target.style.borderColor = 'var(--accent2)'
-  const onBlur     = e => e.target.style.borderColor = 'var(--border)'
+  const onFocus = e => e.target.style.borderColor = 'var(--accent2)'
+  const onBlur = e => e.target.style.borderColor = 'var(--border)'
 
   return (
     <div className="space-y-6">
@@ -105,7 +105,7 @@ export default function UserManager() {
               </label>
             ))}
           </div>
-          {error   && <div className="text-xs font-mono" style={{ color: 'var(--danger)' }}>{error}</div>}
+          {error && <div className="text-xs font-mono" style={{ color: 'var(--danger)' }}>{error}</div>}
           {success && <div className="text-xs font-mono" style={{ color: '#5fbb87' }}>{success}</div>}
           <button type="submit" disabled={saving}
             className="text-sm font-medium px-4 py-2 rounded transition-colors disabled:opacity-50 text-white"
@@ -137,7 +137,7 @@ export default function UserManager() {
                 <tr key={u.uid} className="last:border-0 transition-colors"
                   style={{ borderBottom: '1px solid var(--border)' }}
                   onMouseOver={e => e.currentTarget.style.background = 'var(--bg3)'}
-                  onMouseOut={e  => e.currentTarget.style.background = 'transparent'}>
+                  onMouseOut={e => e.currentTarget.style.background = 'transparent'}>
                   <td className="px-4 py-3 text-sm font-medium" style={{ color: 'var(--text)' }}>
                     {u.email || <span className="italic text-xs" style={{ color: 'var(--text3)' }}>no email</span>}
                   </td>
