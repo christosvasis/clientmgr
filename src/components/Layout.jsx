@@ -5,6 +5,8 @@ import { auth }                 from '../firebase/config'
 import { useAuth }              from '../context/AuthContext'
 import { useTheme }             from '../context/ThemeContext'
 
+const GLYPH_SIZE = '1.25rem' // consistent size for all glyphs
+
 const NAV = [
   { to: '/',         label: 'Dashboard', icon: '⊞', end: true  },
   { to: '/notes',    label: 'Notes',     icon: '≡', end: false },
@@ -57,8 +59,8 @@ export default function Layout({ children }) {
             )}
             <button
               onClick={() => setCollapsed(c => !c)}
-              className="transition-colors ml-auto text-sm font-mono"
-              style={{ color: 'var(--text3)' }}
+              className="transition-colors ml-auto"
+              style={{ color: 'var(--text3)', fontSize: GLYPH_SIZE, lineHeight: 1 }}
               onMouseOver={e => e.target.style.color = 'var(--text)'}
               onMouseOut={e  => e.target.style.color = 'var(--text3)'}
             >
@@ -88,7 +90,10 @@ export default function Layout({ children }) {
                   borderLeftColor: isActive ? 'var(--accent)' : 'transparent',
                 })}
               >
-                <span className="text-base flex-shrink-0" style={{ color: 'var(--text3)' }}>
+                <span
+                  className="flex-shrink-0"
+                  style={{ fontSize: GLYPH_SIZE, color: 'var(--text3)', lineHeight: 1, width: '1.25rem', textAlign: 'center' }}
+                >
                   {item.icon}
                 </span>
                 {!collapsed && <span className="truncate">{item.label}</span>}
@@ -118,7 +123,12 @@ export default function Layout({ children }) {
                   borderLeftColor: isActive ? 'var(--accent)' : 'transparent',
                 })}
               >
-                <span className="text-base flex-shrink-0" style={{ color: 'var(--text3)' }}>◈</span>
+                <span
+                  className="flex-shrink-0"
+                  style={{ fontSize: GLYPH_SIZE, color: 'var(--text3)', lineHeight: 1, width: '1.25rem', textAlign: 'center' }}
+                >
+                  ◈
+                </span>
                 {!collapsed && <span className="truncate">Admin</span>}
               </NavLink>
             )}
@@ -129,7 +139,12 @@ export default function Layout({ children }) {
               className="flex items-center gap-3 px-4 py-2.5 text-sm transition-colors w-full border-l-2 border-transparent whitespace-nowrap overflow-hidden"
               style={{ color: 'var(--danger)' }}
             >
-              <span className="text-base flex-shrink-0">→</span>
+              <span
+                className="flex-shrink-0"
+                style={{ fontSize: GLYPH_SIZE, lineHeight: 1, width: '1.25rem', textAlign: 'center' }}
+              >
+                ⏻
+              </span>
               {!collapsed && <span className="truncate">Logout</span>}
             </button>
           </div>
@@ -150,12 +165,18 @@ export default function Layout({ children }) {
             </div>
             <div className="flex items-center gap-3">
 
-              {/* Theme toggle — sun/moon glyph */}
+              {/* Theme toggle */}
               <button
                 onClick={toggleTheme}
                 title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-                className="w-8 h-8 rounded-lg flex items-center justify-center transition-colors text-base"
-                style={{ background: 'var(--btn-bg)', color: 'var(--text2)', border: '1px solid var(--border)' }}
+                className="w-8 h-8 rounded-lg flex items-center justify-center transition-colors"
+                style={{
+                  background:  'var(--btn-bg)',
+                  color:       'var(--text2)',
+                  border:      '1px solid var(--border)',
+                  fontSize:    GLYPH_SIZE,
+                  lineHeight:  1,
+                }}
               >
                 {theme === 'dark' ? '☀' : '☽'}
               </button>

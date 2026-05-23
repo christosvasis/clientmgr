@@ -72,136 +72,141 @@ export default function Home() {
   return (
     <div className="p-6 flex flex-col h-full min-h-0" style={{ background: 'var(--bg)' }}>
 
-      {/* Recently used */}
-      {recentlyUsed.length > 0 && (
-        <div className="mb-4">
-          <div className="text-[10px] uppercase tracking-widest mb-2" style={{ color: 'var(--text3)' }}>
-            Recently used
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {recentlyUsed.map(name => (
-              <button
-                key={name}
-                onClick={() => {
-                  setSearch(name)
-                  setTimeout(() => {
-                    const client = clients.find(c => c.name === name)
-                    if (client) openClient(client)
-                  }, 50)
-                }}
-                className="flex items-center gap-2 text-xs rounded-full px-3 py-1 transition-colors"
-                style={{ background: 'var(--bg2)', border: '1px solid var(--border)', color: 'var(--text2)' }}
-                onMouseOver={e => { e.currentTarget.style.borderColor = 'var(--accent2)'; e.currentTarget.style.color = 'var(--text)' }}
-                onMouseOut={e  => { e.currentTarget.style.borderColor = 'var(--border)';  e.currentTarget.style.color = 'var(--text2)' }}
-              >
-                <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: 'var(--accent)' }} />
-                {name}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
+      {/* Centered container */}
+      <div className="w-full mx-auto" style={{ maxWidth: '640px' }}>
 
-      {/* Search */}
-      <div className="relative mb-3">
-        <input
-          ref={searchRef}
-          type="text"
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          placeholder="Type a client name to search..."
-          className="w-full rounded-lg px-4 py-2.5 text-sm outline-none transition-colors"
-          style={{ background: 'var(--bg2)', border: '1px solid var(--border)', color: 'var(--text)' }}
-          onFocus={e => e.target.style.borderColor = 'var(--accent2)'}
-          onBlur={e  => e.target.style.borderColor = 'var(--border)'}
-        />
-        {search && (
-          <button
-            onClick={() => setSearch('')}
-            className="absolute right-3 top-1/2 -translate-y-1/2 transition-colors text-sm font-mono"
-            style={{ color: 'var(--text3)' }}
-            onMouseOver={e => e.target.style.color = 'var(--text)'}
-            onMouseOut={e  => e.target.style.color = 'var(--text3)'}
-          >
-            x
-          </button>
-        )}
-      </div>
-
-      {/* Result count */}
-      {search && (
-        <div className="text-xs font-mono mb-3" style={{ color: 'var(--text3)' }}>
-          {filtered.length} client{filtered.length !== 1 ? 's' : ''} found
-        </div>
-      )}
-
-      {/* Table */}
-      <div
-        className="rounded-lg overflow-hidden overflow-y-auto"
-        style={{ background: 'var(--bg2)', border: '1px solid var(--border)', maxHeight: '420px' }}
-      >
-        {!search ? (
-          <div className="py-12 text-center text-sm" style={{ color: 'var(--text3)' }}>
-            Start typing to find a client
-          </div>
-        ) : filtered.length === 0 ? (
-          <div className="py-12 text-center text-sm" style={{ color: 'var(--text3)' }}>
-            No clients match &ldquo;{search}&rdquo;
-          </div>
-        ) : (
-          <table className="w-full">
-            <thead>
-              <tr style={{ borderBottom: '1px solid var(--border)' }}>
-                {['Client', 'Status', 'Path', ''].map((h, i) => (
-                  <th
-                    key={i}
-                    className="text-left text-xs uppercase tracking-wider px-4 py-3"
-                    style={{ color: 'var(--text3)' }}
-                  >
-                    {h}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map(client => (
-                <tr
-                  key={client.id}
-                  onClick={() => openClient(client)}
-                  className="cursor-pointer transition-colors last:border-0"
-                  style={{ borderBottom: '1px solid var(--border)' }}
-                  onMouseOver={e => e.currentTarget.style.background = 'var(--bg3)'}
-                  onMouseOut={e  => e.currentTarget.style.background = 'transparent'}
+        {/* Recently used */}
+        {recentlyUsed.length > 0 && (
+          <div className="mb-4">
+            <div className="text-[10px] uppercase tracking-widest mb-2" style={{ color: 'var(--text3)' }}>
+              Recently used
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {recentlyUsed.map(name => (
+                <button
+                  key={name}
+                  onClick={() => {
+                    setSearch(name)
+                    setTimeout(() => {
+                      const client = clients.find(c => c.name === name)
+                      if (client) openClient(client)
+                    }, 50)
+                  }}
+                  className="flex items-center gap-2 text-xs rounded-full px-3 py-1 transition-colors"
+                  style={{ background: 'var(--bg2)', border: '1px solid var(--border)', color: 'var(--text2)' }}
+                  onMouseOver={e => { e.currentTarget.style.borderColor = 'var(--accent2)'; e.currentTarget.style.color = 'var(--text)' }}
+                  onMouseOut={e  => { e.currentTarget.style.borderColor = 'var(--border)';  e.currentTarget.style.color = 'var(--text2)' }}
                 >
-                  <td className="px-4 py-3 text-sm font-medium" style={{ color: 'var(--text)' }}>
-                    {highlight(client.name, search)}
-                  </td>
-                  <td className="px-4 py-3">
-                    <StatusBadge status={client.status} />
-                  </td>
-                  <td
-                    className="px-4 py-3 text-xs font-mono max-w-[160px] truncate"
-                    style={{ color: 'var(--text3)' }}
-                  >
-                    {client.path}
-                  </td>
-                  <td className="px-4 py-3">
-                    <button
-                      onClick={e => copyPath(e, client.path)}
-                      className="text-xs transition-colors font-mono"
-                      style={{ color: 'var(--text3)' }}
-                      onMouseOver={e => e.target.style.color = 'var(--accent)'}
-                      onMouseOut={e  => e.target.style.color = 'var(--text3)'}
-                      title="Copy path"
-                    >
-                      copy
-                    </button>
-                  </td>
-                </tr>
+                  <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: 'var(--accent)' }} />
+                  {name}
+                </button>
               ))}
-            </tbody>
-          </table>
+            </div>
+          </div>
         )}
+
+        {/* Search */}
+        <div className="relative mb-3">
+          <input
+            ref={searchRef}
+            type="text"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            placeholder="Type a client name to search..."
+            className="w-full rounded-lg px-4 py-2 text-sm outline-none transition-colors"
+            style={{ background: 'var(--bg2)', border: '1px solid var(--border)', color: 'var(--text)' }}
+            onFocus={e => e.target.style.borderColor = 'var(--accent2)'}
+            onBlur={e  => e.target.style.borderColor = 'var(--border)'}
+          />
+          {search && (
+            <button
+              onClick={() => setSearch('')}
+              className="absolute right-3 top-1/2 -translate-y-1/2 transition-colors text-sm font-mono"
+              style={{ color: 'var(--text3)' }}
+              onMouseOver={e => e.target.style.color = 'var(--text)'}
+              onMouseOut={e  => e.target.style.color = 'var(--text3)'}
+            >
+              x
+            </button>
+          )}
+        </div>
+
+        {/* Result count */}
+        {search && (
+          <div className="text-xs font-mono mb-3" style={{ color: 'var(--text3)' }}>
+            {filtered.length} client{filtered.length !== 1 ? 's' : ''} found
+          </div>
+        )}
+
+        {/* Table */}
+        <div
+          className="rounded-lg overflow-hidden overflow-y-auto"
+          style={{ background: 'var(--bg2)', border: '1px solid var(--border)', maxHeight: '400px' }}
+        >
+          {!search ? (
+            <div className="py-10 text-center text-sm" style={{ color: 'var(--text3)' }}>
+              Start typing to find a client
+            </div>
+          ) : filtered.length === 0 ? (
+            <div className="py-10 text-center text-sm" style={{ color: 'var(--text3)' }}>
+              No clients match &ldquo;{search}&rdquo;
+            </div>
+          ) : (
+            <table className="w-full">
+              <thead>
+                <tr style={{ borderBottom: '1px solid var(--border)' }}>
+                  {['Client', 'Status', 'Path', ''].map((h, i) => (
+                    <th
+                      key={i}
+                      className="text-left text-xs uppercase tracking-wider px-4 py-2.5"
+                      style={{ color: 'var(--text3)' }}
+                    >
+                      {h}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {filtered.map(client => (
+                  <tr
+                    key={client.id}
+                    onClick={() => openClient(client)}
+                    className="cursor-pointer transition-colors last:border-0"
+                    style={{ borderBottom: '1px solid var(--border)' }}
+                    onMouseOver={e => e.currentTarget.style.background = 'var(--bg3)'}
+                    onMouseOut={e  => e.currentTarget.style.background = 'transparent'}
+                  >
+                    <td className="px-4 py-2.5 text-sm font-medium" style={{ color: 'var(--text)' }}>
+                      {highlight(client.name, search)}
+                    </td>
+                    <td className="px-4 py-2.5">
+                      <StatusBadge status={client.status} />
+                    </td>
+                    <td
+                      className="px-4 py-2.5 text-xs font-mono max-w-[140px] truncate"
+                      style={{ color: 'var(--text3)' }}
+                    >
+                      {client.path}
+                    </td>
+                    <td className="px-4 py-2.5">
+                      <button
+                        onClick={e => copyPath(e, client.path)}
+                        className="text-xs transition-colors font-mono"
+                        style={{ color: 'var(--text3)' }}
+                        onMouseOver={e => e.target.style.color = 'var(--accent)'}
+                        onMouseOut={e  => e.target.style.color = 'var(--text3)'}
+                        title="Copy path"
+                      >
+                        copy
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+
       </div>
 
       {/* Client panel */}
