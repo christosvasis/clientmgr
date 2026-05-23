@@ -3,6 +3,7 @@ import { collection, onSnapshot, addDoc,
          deleteDoc, updateDoc, doc,
          orderBy, query }                  from 'firebase/firestore'
 import { db }                              from '../../firebase/config'
+import StatusBadge from '../StatusBadge'
 
 const EMPTY_CLIENT = { name: '', path: '', status: 'active', notes: '', software: [] }
 const EMPTY_SW     = { key: '', label: '', exe: '' }
@@ -185,11 +186,7 @@ export default function ClientManager() {
                   <td className="px-4 py-3 text-sm font-medium" style={{ color: 'var(--text)' }}>{c.name}</td>
                   <td className="px-4 py-3 text-xs font-mono" style={{ color: 'var(--text3)' }}>{c.path}</td>
                   <td className="px-4 py-3">
-                    <span className="text-xs font-mono px-2 py-0.5 rounded" style={{
-                      background: c.status === 'active' ? '#1a3d28' : c.status === 'inactive' ? '#2d2316' : '#1e2e3d',
-                      color:      c.status === 'active' ? '#5fbb87' : c.status === 'inactive' ? '#c0894a' : '#5b9bd5',
-                      border: `1px solid ${c.status === 'active' ? '#2e6644' : c.status === 'inactive' ? '#5a3e1a' : '#2a4a6a'}`,
-                    }}>{c.status || 'active'}</span>
+                    <StatusBadge status={c.status} />
                   </td>
                   <td className="px-4 py-3 text-xs" style={{ color: 'var(--text3)' }}>
                     {c.software?.length || 0} program{c.software?.length !== 1 ? 's' : ''}
