@@ -88,7 +88,7 @@ export default function UserManager() {
             ))}
           </div>
           {error && <div className="text-xs font-mono" style={{ color: 'var(--danger)' }}>{error}</div>}
-          {success && <div className="text-xs font-mono" style={{ color: '#5fbb87' }}>{success}</div>}
+          {success && <div className="text-xs font-mono" style={{ color: 'var(--success)' }}>{success}</div>}
           <button
             type="submit" disabled={saving}
             className="cm-btn-primary text-sm font-medium px-4 py-2 rounded transition-colors disabled:opacity-50"

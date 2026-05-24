@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { doc, updateDoc } from 'firebase/firestore'
 import { db } from '../firebase/config'
 import { useAuth } from '../context/AuthContext'
@@ -9,6 +9,14 @@ import SearchInput from '../components/ui/SearchInput'
 function NoteModal({ client, onClose, onSaved, canEdit }) {
   const [notes, setNotes] = useState(client.notes || '')
   const [saving, setSaving] = useState(false)
+
+  useEffect(() => {
+    function onKey(e) {
+      if (e.key === 'Escape') onClose()
+    }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [onClose])
 
   async function handleSave() {
     setSaving(true)
@@ -26,6 +34,9 @@ function NoteModal({ client, onClose, onSaved, canEdit }) {
       onClick={onClose}
     >
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-label={`${client.name} notes`}
         className="w-full sm:rounded-xl shadow-2xl flex flex-col"
         style={{
           maxWidth: '560px',

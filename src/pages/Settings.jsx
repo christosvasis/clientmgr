@@ -97,7 +97,7 @@ export default function Settings() {
           <button onClick={saveSettings} className="cm-btn-save text-sm font-medium px-5 py-2 rounded transition-colors">
             Save changes
           </button>
-          {saved && <span className="text-xs font-mono" style={{ color: '#5fbb87' }}>Saved</span>}
+          {saved && <span className="text-xs font-mono" style={{ color: 'var(--success)' }}>Saved</span>}
         </div>
 
       </div>

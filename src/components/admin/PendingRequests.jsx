@@ -58,13 +58,11 @@ export default function PendingRequests({ onCountChange }) {
               <td className="px-4 py-3">
                 <div className="flex gap-2">
                   <button onClick={() => resolve(u.uid, 'approved')}
-                    className="text-xs px-3 py-1.5 rounded transition-colors"
-                    style={{ background: '#1a3d28', color: '#5fbb87', border: '1px solid #2e6644' }}>
+                    className="cm-btn-approve text-xs px-3 py-1.5 rounded transition-colors">
                     Approve
                   </button>
                   <button onClick={() => resolve(u.uid, 'rejected')}
-                    className="text-xs px-3 py-1.5 rounded transition-colors"
-                    style={{ background: '#2d1616', color: '#f87171', border: '1px solid #5a1a1a' }}>
+                    className="cm-btn-reject text-xs px-3 py-1.5 rounded transition-colors">
                     Reject
                   </button>
                 </div>
