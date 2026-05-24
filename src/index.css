@@ -12,6 +12,7 @@
   --text3: #3d6480;
   --border: #1e3a52;
   --danger: #f87171;
+  --success: #5fbb87;
   --btn-bg: #1a2540;
   --btn-hover: #1e2d4d;
 }
@@ -28,6 +29,7 @@
   --text3: #64748b;
   --border: #cbd5e1;
   --danger: #ef4444;
+  --success: #166534;
   --btn-bg: #e2eaf2;
   --btn-hover: #cbd5e1;
 }
@@ -76,3 +78,28 @@
 
 .cm-search { background: var(--bg2); border: 1px solid var(--border); color: var(--text); }
 .cm-search:focus { border-color: var(--accent2); }
+
+/* ----- Status badges (colours differ per theme) ----- */
+[data-theme="dark"] .cm-badge-active   { background: #1a3d28; color: #5fbb87; border: 1px solid #2e6644; }
+[data-theme="dark"] .cm-badge-inactive { background: #2d2316; color: #c0894a; border: 1px solid #5a3e1a; }
+[data-theme="dark"] .cm-badge-on_hold  { background: #1e2e3d; color: #5b9bd5; border: 1px solid #2a4a6a; }
+
+[data-theme="light"] .cm-badge-active   { background: #dcfce7; color: #166534; border: 1px solid #86efac; }
+[data-theme="light"] .cm-badge-inactive { background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; }
+[data-theme="light"] .cm-badge-on_hold  { background: #dbeafe; color: #1e40af; border: 1px solid #93c5fd; }
+
+/* user account statuses */
+[data-theme="dark"] .cm-badge-approved { background: #1a3d28; color: #5fbb87; border: 1px solid #2e6644; }
+[data-theme="dark"] .cm-badge-pending  { background: #2d2316; color: #c0894a; border: 1px solid #5a3e1a; }
+[data-theme="dark"] .cm-badge-rejected { background: #2d1616; color: #f87171; border: 1px solid #5a1a1a; }
+
+[data-theme="light"] .cm-badge-approved { background: #dcfce7; color: #166534; border: 1px solid #86efac; }
+[data-theme="light"] .cm-badge-pending  { background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; }
+[data-theme="light"] .cm-badge-rejected { background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; }
+
+/* ----- Approve / reject buttons (PendingRequests) ----- */
+[data-theme="dark"] .cm-btn-approve { background: #1a3d28; color: #5fbb87; border: 1px solid #2e6644; }
+[data-theme="dark"] .cm-btn-reject  { background: #2d1616; color: #f87171; border: 1px solid #5a1a1a; }
+
+[data-theme="light"] .cm-btn-approve { background: #dcfce7; color: #166534; border: 1px solid #86efac; }
+[data-theme="light"] .cm-btn-reject  { background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; }

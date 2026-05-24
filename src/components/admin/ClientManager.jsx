@@ -136,7 +136,7 @@ export default function ClientManager() {
           />
         </div>
         {error && <div className="text-xs font-mono mb-3" style={{ color: 'var(--danger)' }}>{error}</div>}
-        {success && <div className="text-xs font-mono mb-3" style={{ color: '#5fbb87' }}>{success}</div>}
+        {success && <div className="text-xs font-mono mb-3" style={{ color: 'var(--success)' }}>{success}</div>}
         <div className="flex gap-2">
           <button
             onClick={handleSave} disabled={saving}

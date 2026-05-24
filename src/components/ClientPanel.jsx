@@ -26,6 +26,14 @@ export default function ClientPanel({ client, onClose, onUpdated }) {
     }
   }, [client?.id])
 
+  useEffect(() => {
+    function onKey(e) {
+      if (e.key === 'Escape') onClose()
+    }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [onClose])
+
   if (!client) return null
 
   async function handleSave() {
@@ -56,6 +64,9 @@ export default function ClientPanel({ client, onClose, onUpdated }) {
     <>
       <div className="fixed inset-0 z-20" style={{ background: 'rgba(0,0,0,0.4)' }} onClick={onClose} />
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-label={`${client.name} details`}
         className="fixed right-0 top-0 h-full z-30 flex flex-col shadow-2xl w-full sm:w-[440px]"
         style={{ background: 'var(--bg2)', borderLeft: '1px solid var(--border)' }}
       >
